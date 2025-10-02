@@ -2,6 +2,54 @@
 
 A full-stack tenant management application with Spring Boot backend and React frontend, designed for containerized deployment.
 
+## Architecture Overview
+
+This application follows a modern, layered architecture with clear separation of concerns:
+
+- **Frontend**: React SPA with component-based architecture
+- **Backend**: Spring Boot with layered architecture (Controller → Service → Repository → Entity)
+- **Database**: H2 (development) / PostgreSQL (production) with Flyway migrations
+- **Infrastructure**: Docker containerization with orchestration
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        React[React SPA<br/>Port 3000]
+        Components[Components<br/>- Dashboard<br/>- Tenants<br/>- Properties<br/>- Transactions]
+    end
+    
+    subgraph "Backend Layer"
+        API[Spring Boot API<br/>Port 8080]
+        Controllers[Controllers<br/>- TenantController<br/>- PropertyController<br/>- TransactionController]
+        Services[Services<br/>- TenantService<br/>- PropertyService<br/>- TransactionService]
+        Repositories[Repositories<br/>- JPA Repositories]
+    end
+    
+    subgraph "Database Layer"
+        H2Dev[H2 Database<br/>Development]
+        PostgreSQL[PostgreSQL<br/>Production]
+    end
+    
+    React --> API
+    API --> Controllers
+    Controllers --> Services
+    Services --> Repositories
+    Repositories --> H2Dev
+    Repositories --> PostgreSQL
+    
+    classDef frontend fill:#e1f5fe
+    classDef backend fill:#f3e5f5
+    classDef database fill:#e8f5e8
+    
+    class React,Components frontend
+    class API,Controllers,Services,Repositories backend
+    class H2Dev,PostgreSQL database
+```
+
+📖 **Detailed Architecture Documentation**: See [docs/architecture/](./docs/architecture/) for comprehensive architecture documentation including system design, component interactions, database schema, deployment strategies, and API documentation.
+
 ## Project Structure
 
 ```
