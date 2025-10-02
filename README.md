@@ -5,7 +5,7 @@ A full-stack tenant management application with Spring Boot backend and React fr
 ## Project Structure
 
 ```
-tenant-management-java/
+tenant-management-java-app/
 ├── backend/                 # Spring Boot application
 │   ├── src/
 │   ├── pom.xml

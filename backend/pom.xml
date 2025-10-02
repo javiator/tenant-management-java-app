@@ -87,7 +87,7 @@
         <version>3.3.4</version>
         <configuration>
           <image>
-            <name>tenant-management-java:${project.version}</name>
+            <name>tenant-management-java-app:${project.version}</name>
           </image>
         </configuration>
         <executions>
