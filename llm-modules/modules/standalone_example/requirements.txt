@@ -1,0 +1,14 @@
+# Standalone module dependencies
+# This module can run independently with minimal shared dependencies
+
+# Core dependencies (minimal)
+typer>=0.9.0
+rich>=13.0.0
+
+# Optional: Add module-specific dependencies here
+# requests>=2.31.0
+# pandas>=2.0.0
+# numpy>=1.24.0
+
+# Note: This module only uses shared.utils and shared.config
+# It does NOT require the full LLM client stack

@@ -70,10 +70,11 @@ cp .env.example .env
 ## Available Modules
 
 - **Chat Bot**: Interactive chat interface with multiple LLM providers
-- **Text Analyzer**: Text analysis, sentiment, and content processing
+- **Text Analyzer**: Text analysis, sentiment, and content processing  
 - **Code Generator**: Code generation and documentation tools
-- **Document Processor**: PDF, text, and document processing
-- **API Wrapper**: RESTful API wrapper for LLM services
+- **Standalone Example**: Minimal dependency standalone module
+- **Document Processor**: PDF, text, and document processing (planned)
+- **API Wrapper**: RESTful API wrapper for LLM services (planned)
 
 ## Development
 
@@ -93,9 +94,30 @@ cp .env.example .env
 
 ## Architecture
 
+### Module Independence Levels
+
+**Level 1: Fully Standalone** (e.g., `standalone_example`)
+- Minimal shared dependencies
+- Own requirements.txt and Dockerfile
+- Can deploy independently
+- Only uses `shared.utils` and `shared.config`
+
+**Level 2: Lightweight Shared** (e.g., `chat_bot`, `text_analyzer`)
+- Uses shared LLM clients and configuration
+- Own business logic
+- Can run independently or in unified environment
+
+**Level 3: Full Integration**
+- Uses all shared components
+- Benefits from unified environment
+- Consistent patterns across modules
+
+### Module Structure
+
 Each module follows a consistent structure:
 - `main.py`: Entry point and CLI interface
 - `core.py`: Core business logic
-- `config.py`: Module-specific configuration
-- `utils.py`: Module-specific utilities
+- `config.py`: Module-specific configuration (optional)
+- `requirements.txt`: Module-specific dependencies (optional)
+- `Dockerfile`: Standalone deployment (optional)
 - `README.md`: Module documentation
