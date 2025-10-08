@@ -1,0 +1,63 @@
+---
+description: MCP server rules for backend-mcp project
+globs: [
+  "backend-mcp/**/*.ts",
+  "backend-mcp/**/*.json",
+  "backend-mcp/**/*.md",
+  "backend-mcp/.env*"
+]
+alwaysApply: true
+---
+
+# Backend MCP Rules
+
+## Project Scope
+- TypeScript MCP server wrapping the Tenant Management Spring Boot API.
+- Uses `@modelcontextprotocol/server` to expose REST resources as tools.
+- Resides in `backend-mcp/` with strict TypeScript configuration.
+
+## Engineering Standards
+- Target Node.js 20.11 or newer; rely on native `fetch`.
+- Keep the project ESM (`"type": "module"`); prefer explicit `.js` extensions on local imports.
+- Leverage Zod (`zod`) for all input/output validation, including environment parsing.
+- Treat HTTP failures as actionable errors (`BackendApiError`); include response details where helpful.
+- Avoid silent catches; allow exceptions to propagate so MCP clients receive actionable error messages.
+
+## Tool Design Guidelines
+- One MCP tool per core backend action (CRUD + relationship lookups).
+- Prefer JSON responses (`{ type: "json", json: ... }`) unless returning human-readable confirmations.
+- Require the minimal set of input fields; allow optional fields to be `null` for clearing values.
+- Enforce “at least one field to update” when performing partial updates.
+- Document new tools in `backend-mcp/README.md` and link expected inputs/outputs.
+
+## File Organization
+```
+backend-mcp/
+├── src/
+│   ├── config.ts            # Env validation
+│   ├── httpClient.ts        # HTTP wrapper + error handling
+│   ├── types.ts             # Zod schemas + TypeScript types
+│   └── tools/               # Tool registrations grouped by domain
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
+## Development Workflow
+1. Add or update Zod schemas in `src/types.ts`.
+2. Extend or create tool modules under `src/tools/`.
+3. Register new tools in `src/index.ts`.
+4. Update documentation and lint/compile locally (`npm run lint`, `npm run build`).
+
+## Testing & Validation
+- Whenever possible, cover new helper logic with lightweight unit tests (Jest or Vitest) and document sample tool invocations.
+- Manual spot checks against a running backend are acceptable if automated tests are impractical; record sample calls in the README.
+
+## Security & Config
+- Keep backend credentials outside source control; extend `.env.example` when new variables are introduced.
+- Support bearer token auth via `Authorization: Bearer …` when `BACKEND_MCP_API_TOKEN` is provided.
+
+## Contribution Notes
+- Maintain consistent code style via ESLint configuration already present.
+- Prefer small, focused modules; avoid large monolithic tool definitions.
+- When adding dependencies, keep them aligned with Node 20 ESM environments and update package scripts if needed.
