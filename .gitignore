@@ -64,6 +64,8 @@ coverage/
 
 # Dependency directories
 jspm_packages/
+.venv/
+*.egg-info/
 
 # Optional npm cache directory
 .npm

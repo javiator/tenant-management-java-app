@@ -11,6 +11,8 @@ tenant-management-java-app/
 │   ├── pom.xml
 │   ├── Dockerfile
 │   └── docker-compose.yml   # Backend-only compose
+├── backend-mcp/             # MCP server exposing backend APIs (TypeScript/Node)
+├── backend-mcp-uv/          # MCP server exposing backend APIs (Python/uv)
 ├── frontend/                # React application
 │   ├── src/
 │   ├── public/
@@ -37,18 +39,26 @@ tenant-management-java-app/
 - **Tailwind CSS** for styling
 - **Nginx** for production serving
 
+### MCP Servers
+- **Node.js 20** with TypeScript (`backend-mcp/`) using `@modelcontextprotocol/server`
+- **Python 3.11+** with `uv` (`backend-mcp-uv/`) using the `mcp` FastMCP implementation, `pydantic`, and `httpx`
+
 ## Quick Start
 
 ### Option 1: Full Stack with Docker Compose (Recommended)
 
 ```bash
-# Start all services (PostgreSQL + Backend + Frontend)
+# Development (H2 Database) - Default
 docker compose up --build
+
+# Production (PostgreSQL Database)
+PROFILE=prod docker compose up --build
 
 # Access the application
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:8080
 # API Docs: http://localhost:8080/swagger-ui.html
+# H2 Console (dev only): http://localhost:8080/h2-console
 ```
 
 ### Option 2: Development Mode
@@ -56,8 +66,11 @@ docker compose up --build
 #### Backend Only
 ```bash
 cd backend
+# Development with H2 (default)
 mvn spring-boot:run
-# Backend runs on http://localhost:8080
+
+# Production with PostgreSQL (requires PostgreSQL running)
+mvn spring-boot:run -Dspring.profiles.active=prod
 ```
 
 #### Frontend Only
@@ -66,6 +79,18 @@ cd frontend
 npm install
 npm start
 # Frontend runs on http://localhost:3000
+```
+
+#### MCP Server Only
+```bash
+cd backend-mcp
+npm install
+cp .env.example .env   # adjust BACKEND_MCP_BASE_URL if needed
+npm run dev            # Starts MCP server on stdio for compatible clients
+
+cd ../backend-mcp-uv
+uv sync
+uv run backend-mcp-uv --transport streamable-http  # HTTP transport for local testing
 ```
 
 ## API Endpoints
@@ -90,14 +115,24 @@ npm start
 
 ## Database
 
+### Automatic Database Selection
+The application automatically chooses the right database based on the Spring profile:
+
+| Environment | Command | Database | Access |
+|-------------|---------|----------|---------|
+| **Development** | `docker compose up` | H2 | H2 Console: http://localhost:8080/h2-console |
+| **Production** | `PROFILE=prod docker compose up` | PostgreSQL | Database connection required |
+
 ### Development (H2)
-- In-memory database with console at `http://localhost:8080/h2-console`
-- JDBC URL: `jdbc:h2:mem:testdb`
+- File-based database with console at `http://localhost:8080/h2-console`
+- JDBC URL: `jdbc:h2:file:./data/dev-db`
 - Username: `sa`, Password: (empty)
+- **No external database required**
 
 ### Production (PostgreSQL)
 - Persistent database with Docker volume
-- Connection details in `docker-compose.yml`
+- Automatically started with `PROFILE=prod docker compose up`
+- Connection details configured automatically
 
 ## Features
 
@@ -122,6 +157,14 @@ mvn spring-boot:run
 cd frontend
 npm install
 npm start
+```
+
+### MCP Server Development
+```bash
+cd backend-mcp
+npm install
+npm run dev      # hot-reloads with tsx
+npm run build    # produce dist/ output
 ```
 
 ### Database Migrations
@@ -150,13 +193,24 @@ docker run -p 3000:3000 tenant-frontend
 
 ## Configuration
 
+### Simple Environment-Based Configuration
+The application uses a **single configuration** that automatically switches databases:
+
+```bash
+# Development (H2) - Default
+docker compose up
+
+# Production (PostgreSQL) - Just set environment variable
+PROFILE=prod docker compose up
+```
+
 ### Environment Variables
-- `SPRING_PROFILES_ACTIVE`: `dev` (H2) or `prod` (PostgreSQL)
+- `PROFILE`: `dev` (default, H2) or `prod` (PostgreSQL)
 - `REACT_APP_API_URL`: Backend API URL for frontend
 
 ### Database Configuration
-- Development: H2 in-memory database
-- Production: PostgreSQL with persistent storage
+- **Development**: H2 file-based database (automatic)
+- **Production**: PostgreSQL with persistent storage (automatic)
 
 ## Troubleshooting
 
@@ -171,10 +225,11 @@ docker run -p 3000:3000 tenant-frontend
 ```bash
 # For H2 development
 rm -f backend/data/dev-db*
+docker compose up
 
-# For PostgreSQL
+# For PostgreSQL production
 docker compose down -v
-docker compose up --build
+PROFILE=prod docker compose up --build
 ```
 
 ## Contributing

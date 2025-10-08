@@ -52,10 +52,10 @@ backend/
 
 ## Quick Start
 
-### Development Mode (H2 Database)
+### Development Mode (H2 Database) - Default
 
 ```bash
-# Run with Maven
+# Run with Maven (uses H2 automatically)
 mvn spring-boot:run
 
 # Or build and run JAR
@@ -72,15 +72,11 @@ java -jar target/tenant-management-0.0.1-SNAPSHOT.jar
 ### Production Mode (PostgreSQL)
 
 ```bash
-# Using Docker Compose
-docker compose up --build
+# Simple production mode (requires PostgreSQL running)
+mvn spring-boot:run -Dspring.profiles.active=prod
 
-# Or with environment variables
-export SPRING_PROFILES_ACTIVE=prod
-export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/tenant_management
-export SPRING_DATASOURCE_USERNAME=tenant_user
-export SPRING_DATASOURCE_PASSWORD=tenant_pass
-mvn spring-boot:run
+# Using Docker Compose (starts PostgreSQL automatically)
+PROFILE=prod docker compose up --build
 ```
 
 ## API Endpoints
@@ -159,30 +155,31 @@ mvn spring-boot:run
 
 ## Database Configuration
 
-### Development (H2)
-```yaml
-spring:
-  profiles:
-    active: dev
-  datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password: 
-  h2:
-    console:
-      enabled: true
+### Automatic Database Selection
+Spring Boot automatically chooses the right database based on the active profile:
+
+| Profile | Database | Configuration | Command |
+|---------|----------|---------------|---------|
+| `dev` (default) | H2 | Automatic | `mvn spring-boot:run` |
+| `prod` | PostgreSQL | Environment variables | `mvn spring-boot:run -Dspring.profiles.active=prod` |
+
+### Development (H2) - Default
+```properties
+# application-dev.properties (minimal configuration)
+spring.datasource.url=jdbc:h2:file:./data/dev-db;MODE=PostgreSQL;...
+spring.datasource.driver-class-name=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
 ```
 
 ### Production (PostgreSQL)
-```yaml
-spring:
-  profiles:
-    active: prod
-  datasource:
-    url: jdbc:postgresql://postgres:5432/tenant_management
-    username: tenant_user
-    password: tenant_pass
+```properties
+# application-prod.properties (minimal configuration)
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.h2.console.enabled=false
 ```
+
+**Database URL provided via environment variables in Docker Compose**
 
 ## Database Migrations
 
@@ -228,11 +225,11 @@ docker run -p 8080:8080 \
 
 ### Docker Compose
 ```bash
-# Backend only
+# Development with H2 (default)
 docker compose up
 
-# With PostgreSQL
-docker compose -f docker-compose.yml up db api
+# Production with PostgreSQL
+PROFILE=prod docker compose up
 ```
 
 ## Development
@@ -464,8 +461,8 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--debug"
 ```
 
 ### Database Console
-- H2 Console: http://localhost:8080/h2-console
-- JDBC URL: `jdbc:h2:mem:testdb`
+- H2 Console: http://localhost:8080/h2-console (development only)
+- JDBC URL: `jdbc:h2:file:./data/dev-db`
 - Username: `sa`, Password: (empty)
 
 ## API Documentation
