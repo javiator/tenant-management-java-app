@@ -76,13 +76,24 @@ export const tenantUpdateSchema = z
     }
   );
 
+export const transactionTypeEnum = z.enum([
+  "rent",
+  "security",
+  "payment_received",
+  "gas",
+  "electricity",
+  "water",
+  "maintenance",
+  "misc"
+]);
+
 export const transactionSchema = z.object({
   id: z.number().int().nonnegative(),
   propertyId: z.number().int().nonnegative(),
   propertyAddress: z.string().nullable().optional(),
   tenantId: z.number().int().nonnegative().nullable().optional(),
   tenantName: z.string().nullable().optional(),
-  type: z.string().min(1),
+  type: transactionTypeEnum,
   forMonth: z.string().nullable().optional(),
   amount: z.number(),
   transactionDate: z.string().min(1),
@@ -92,7 +103,7 @@ export const transactionSchema = z.object({
 export const transactionCreateSchema = z.object({
   propertyId: z.number().int().nonnegative(),
   tenantId: z.number().int().nonnegative().nullable().optional(),
-  type: z.string().min(1),
+  type: transactionTypeEnum,
   forMonth: z.string().nullable().optional(),
   amount: z.number(),
   transactionDate: z.string().min(1),
@@ -103,7 +114,7 @@ export const transactionUpdateSchema = z
   .object({
     propertyId: z.number().int().nonnegative().optional(),
     tenantId: z.number().int().nonnegative().nullable().optional(),
-    type: z.string().min(1).optional(),
+    type: transactionTypeEnum.optional(),
     forMonth: z.string().nullable().optional(),
     amount: z.number().optional(),
     transactionDate: z.string().min(1).optional(),
@@ -125,6 +136,7 @@ export type PropertyInput = z.infer<typeof propertyInputSchema>;
 export type Tenant = z.infer<typeof tenantSchema>;
 export type TenantCreateInput = z.infer<typeof tenantCreateSchema>;
 export type TenantUpdateInput = z.infer<typeof tenantUpdateSchema>;
+export type TransactionType = z.infer<typeof transactionTypeEnum>;
 export type Transaction = z.infer<typeof transactionSchema>;
 export type TransactionCreateInput = z.infer<typeof transactionCreateSchema>;
 export type TransactionUpdateInput = z.infer<typeof transactionUpdateSchema>;

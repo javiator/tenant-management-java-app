@@ -66,6 +66,7 @@ coverage/
 jspm_packages/
 .venv/
 *.egg-info/
+__pycache__/
 
 # Optional npm cache directory
 .npm

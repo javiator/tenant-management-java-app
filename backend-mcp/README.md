@@ -85,6 +85,8 @@ Optional tenant fields include passport details, contact info, rent/security, an
 
 **Payment categorisation:** Treat every transaction type other than `payment_received` as an outstanding amount. `payment_received` entries indicate funds already collected from the tenant, so client summaries should subtract those from outstanding balances.
 
+**Allowed `type` values:** `rent`, `security`, `payment_received`, `gas`, `electricity`, `water`, `maintenance`, `misc`
+
 ## Error Handling
 
 - Backend validation errors propagate with status codes and messages, making it clear which field needs attention.

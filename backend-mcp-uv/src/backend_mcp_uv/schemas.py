@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field, PositiveInt, TypeAdapter, model_validator
@@ -106,7 +107,7 @@ class Transaction(BaseModel):
     propertyAddress: Optional[str] = None
     tenantId: Optional[PositiveInt] = None
     tenantName: Optional[str] = None
-    type: str = Field(min_length=1)
+    type: "TransactionType"
     forMonth: Optional[str] = None
     amount: float
     transactionDate: str = Field(min_length=1)
@@ -122,7 +123,7 @@ transaction_list_adapter = TypeAdapter(list[Transaction])
 class TransactionCreate(BaseModel):
     propertyId: PositiveInt
     tenantId: Optional[PositiveInt] = None
-    type: str = Field(min_length=1)
+    type: "TransactionType"
     forMonth: Optional[str] = None
     amount: float
     transactionDate: str = Field(min_length=1)
@@ -132,7 +133,7 @@ class TransactionCreate(BaseModel):
 class TransactionUpdate(BaseModel):
     propertyId: Optional[PositiveInt] = None
     tenantId: Optional[PositiveInt] = None
-    type: Optional[str] = Field(default=None, min_length=1)
+    type: Optional["TransactionType"] = None
     forMonth: Optional[str] = None
     amount: Optional[float] = None
     transactionDate: Optional[str] = Field(default=None, min_length=1)
@@ -156,3 +157,14 @@ class TransactionUpdatePayload(TransactionUpdate):
         if not payload:
             raise ValueError("At least one field must be provided to update a transaction.")
         return model
+
+
+class TransactionType(str, Enum):
+    RENT = "rent"
+    SECURITY = "security"
+    PAYMENT_RECEIVED = "payment_received"
+    GAS = "gas"
+    ELECTRICITY = "electricity"
+    WATER = "water"
+    MAINTENANCE = "maintenance"
+    MISC = "misc"

@@ -91,6 +91,8 @@ Optional tenant fields include passport metadata, contact numbers, rent/security
 
 **Payment categorisation:** Any transaction type other than `payment_received` represents an outstanding charge. Entries tagged `payment_received` record money collected from the tenant, so MCP clients should subtract them when summarising balances.
 
+**Allowed `type` values:** `rent`, `security`, `payment_received`, `gas`, `electricity`, `water`, `maintenance`, `misc`
+
 ## Error Handling
 
 - Non-2xx backend responses raise `BackendApiError` with HTTP status codes and backend-supplied details.
