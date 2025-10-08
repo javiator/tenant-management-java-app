@@ -89,6 +89,8 @@ Optional tenant fields include passport metadata, contact numbers, rent/security
 | `update_transaction` | Update one or more transaction fields. | `{ "id": number, ...at least one field }` |
 | `delete_transaction` | Delete a transaction. Returns a confirmation string. | `{ "transaction_id": number }` |
 
+**Payment categorisation:** Any transaction type other than `payment_received` represents an outstanding charge. Entries tagged `payment_received` record money collected from the tenant, so MCP clients should subtract them when summarising balances.
+
 ## Error Handling
 
 - Non-2xx backend responses raise `BackendApiError` with HTTP status codes and backend-supplied details.

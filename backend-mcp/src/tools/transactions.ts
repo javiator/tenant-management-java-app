@@ -23,9 +23,13 @@ const transactionUpdateWithIdSchema = z
   });
 
 export function registerTransactionTools(server: MCPServer): void {
+  const paymentLogicNote =
+    "Payment logic: `payment_received` entries represent funds collected from tenants. " +
+    "All other transaction types should be treated as outstanding amounts.";
+
   server.tool({
     name: "list_transactions",
-    description: "Retrieve all transactions from the backend.",
+    description: `Retrieve all transactions from the backend. ${paymentLogicNote}`,
     inputSchema: z
       .object({})
       .describe("No parameters required to list all transactions."),
@@ -47,7 +51,7 @@ export function registerTransactionTools(server: MCPServer): void {
 
   server.tool({
     name: "get_transaction",
-    description: "Fetch a single transaction by identifier.",
+    description: `Fetch a single transaction by identifier. ${paymentLogicNote}`,
     inputSchema: z.object({
       id: z.number().int().nonnegative().describe("Transaction identifier")
     }),

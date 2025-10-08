@@ -19,14 +19,22 @@ from ..schemas import (
 def register_transaction_tools(server) -> None:
     """Register transaction tools on the provided MCP server."""
 
+    payment_logic_note = (
+        "Payment logic: `payment_received` marks funds collected from tenants; "
+        "all other transaction types should be treated as outstanding amounts."
+    )
+
     @server.tool(
         name="list_transactions",
-        description="Retrieve all property and tenant transactions.",
+        description=f"Retrieve all property and tenant transactions. {payment_logic_note}",
     )
     async def list_transactions() -> list[Transaction]:
         return await request_json("GET", "/api/transactions", adapter=transaction_list_adapter)
 
-    @server.tool(name="get_transaction", description="Fetch a transaction by identifier.")
+    @server.tool(
+        name="get_transaction",
+        description=f"Fetch a transaction by identifier. {payment_logic_note}",
+    )
     async def get_transaction(
         transaction_id: Annotated[PositiveInt, Field(description="Unique transaction identifier")],
     ) -> Transaction:

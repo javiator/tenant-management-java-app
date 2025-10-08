@@ -83,6 +83,8 @@ Optional tenant fields include passport details, contact info, rent/security, an
 | `update_transaction` | Update one or more transaction fields. | `{ "id": number, ...at least one field }` |
 | `delete_transaction` | Delete a transaction. Returns a confirmation text. | `{ "id": number }` |
 
+**Payment categorisation:** Treat every transaction type other than `payment_received` as an outstanding amount. `payment_received` entries indicate funds already collected from the tenant, so client summaries should subtract those from outstanding balances.
+
 ## Error Handling
 
 - Backend validation errors propagate with status codes and messages, making it clear which field needs attention.
