@@ -1,0 +1,101 @@
+---
+description: Database and migration rules for Flyway
+globs: ["**/*.sql", "**/migration/**", "**/db/**"]
+alwaysApply: true
+---
+
+# Database and Migration Rules
+
+## Flyway Migration Standards
+- Use proper naming convention: V{version}__{description}.sql
+- Increment version numbers sequentially
+- Use descriptive migration names
+- Include both schema changes and seed data
+- Test migrations in development before production
+- Never modify existing migrations once deployed
+
+## Migration Naming Examples
+```
+V1__init.sql          # Initial schema
+V2__seed.sql          # Seed data
+V3__add_audit_fields.sql
+V4__add_property_indexes.sql
+V5__update_tenant_schema.sql
+```
+
+## Database Schema Standards
+- Use snake_case for column names
+- Use camelCase for Java entity properties
+- Implement audit fields on all tables
+- Use proper data types and constraints
+- Include proper indexes for performance
+- Use foreign key constraints
+
+## Audit Fields Pattern
+```sql
+-- Standard audit fields for all tables
+created_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+created_by VARCHAR(50) NOT NULL DEFAULT 'system',
+last_updated TIMESTAMP WITH TIME ZONE,
+last_updated_by VARCHAR(50)
+```
+
+## Index Guidelines
+- Create indexes for frequently queried columns
+- Include composite indexes for multi-column queries
+- Consider partial indexes for filtered data
+- Monitor index usage and performance
+- Don't over-index (affects write performance)
+
+## Data Types Standards
+- Use appropriate data types for each field
+- Use TIMESTAMP WITH TIME ZONE for dates
+- Use VARCHAR with appropriate lengths
+- Use DECIMAL for monetary values
+- Use BOOLEAN for true/false values
+- Use JSON/JSONB for complex data structures
+
+## Constraint Guidelines
+- Use NOT NULL constraints where appropriate
+- Implement foreign key constraints
+- Use CHECK constraints for data validation
+- Use UNIQUE constraints for unique values
+- Use DEFAULT values where appropriate
+
+## Seed Data Standards
+- Include realistic test data
+- Use consistent data patterns
+- Include edge cases and test scenarios
+- Use proper foreign key relationships
+- Include both positive and negative test cases
+
+## Migration Best Practices
+- Always backup before running migrations
+- Test migrations on copy of production data
+- Use transactions for complex migrations
+- Include rollback procedures
+- Document migration purposes
+- Review migrations in code review
+
+## Performance Considerations
+- Use batch operations for large data changes
+- Consider downtime for major schema changes
+- Use online migration tools when possible
+- Monitor migration performance
+- Plan for migration rollback time
+
+## Security Guidelines
+- Never include sensitive data in migrations
+- Use environment-specific configurations
+- Validate data before migration
+- Use proper access controls
+- Audit migration changes
+- Encrypt sensitive data in transit
+
+## Testing Migrations
+- Test on development environment first
+- Use test data that mirrors production
+- Test both forward and rollback migrations
+- Verify data integrity after migration
+- Test application compatibility
+- Performance test after migration

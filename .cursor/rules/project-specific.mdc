@@ -1,0 +1,212 @@
+---
+description: Project-specific rules for tenant management Java application
+globs: ["**/*.java", "**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"]
+alwaysApply: true
+---
+
+# Tenant Management Java App - Project Rules
+
+## Project Overview
+Full-stack tenant management application with Spring Boot backend and React frontend, designed for containerized deployment.
+
+## Technology Stack
+- **Backend**: Java 21, Spring Boot 3.3.4, Spring Data JPA, H2/PostgreSQL, Flyway, Maven
+- **Frontend**: React 18, Material-UI, Axios, Tailwind CSS, Nginx
+- **Infrastructure**: Docker, Docker Compose
+
+## Architecture Patterns
+
+### Backend Architecture (Spring Boot)
+- **Layered Architecture**: Domain → Repository → Service → Controller → DTO
+- **Package Structure**: `com.example.tenantmanagement.{domain,repository,service,web}`
+- **Entity Pattern**: JPA entities with audit fields (createdDate, createdBy, lastUpdated, lastUpdatedBy)
+- **Repository Pattern**: Spring Data JPA repositories extending JpaRepository
+- **Service Layer**: Business logic with DTO mapping
+- **Controller Pattern**: RESTful controllers with proper HTTP status codes
+- **DTO Pattern**: Separate DTOs for API communication
+
+### Frontend Architecture (React)
+- **Component Structure**: Functional components with hooks
+- **State Management**: useState, useEffect, useCallback for local state
+- **API Communication**: Axios with centralized error handling
+- **UI Framework**: Material-UI components with consistent styling
+- **Form Handling**: Controlled components with validation
+- **Modal Pattern**: Reusable modal components for CRUD operations
+
+## Code Standards
+
+### Java/Spring Boot Standards
+- Use Java 21 features (records, pattern matching, text blocks)
+- Follow Spring Boot best practices and conventions
+- Use constructor injection over field injection
+- Implement proper exception handling with GlobalExceptionHandler
+- Use @Valid for request validation
+- Follow RESTful API design principles
+- Use proper HTTP status codes (@ResponseStatus)
+- Implement audit fields in entities (@PrePersist, @PreUpdate)
+- Use Flyway for database migrations with proper naming (V{version}__{description}.sql)
+
+### React/JavaScript Standards
+- Use functional components with hooks
+- Implement proper error handling with toast notifications
+- Use Material-UI components consistently
+- Follow React best practices (keys, proper state updates)
+- Use axios for API calls with proper error handling
+- Implement loading states and user feedback
+- Use controlled components for forms
+- Follow responsive design principles
+
+### Database Standards
+- Use Flyway migrations for schema changes
+- Follow naming conventions (snake_case for columns, camelCase for Java)
+- Implement audit fields (created_date, created_by, last_updated, last_updated_by)
+- Use proper data types and constraints
+- Include seed data migrations
+
+### API Design Standards
+- RESTful endpoints with proper HTTP methods
+- Consistent URL patterns (/api/{resource})
+- Proper status codes (200, 201, 204, 400, 404, 500)
+- Use DTOs for request/response mapping
+- Implement proper error responses
+- Include API documentation with Springdoc OpenAPI
+
+## File Organization
+
+### Backend Structure
+```
+src/main/java/com/example/tenantmanagement/
+├── domain/           # JPA Entities
+├── repository/       # Data Access Layer
+├── service/          # Business Logic
+└── web/             # Controllers and DTOs
+    └── dto/         # Data Transfer Objects
+```
+
+### Frontend Structure
+```
+src/
+├── components/       # React Components
+├── App.js           # Main App Component
+└── index.js         # Entry Point
+```
+
+## Development Guidelines
+
+### When Adding New Features
+1. **Backend**: Create entity → repository → service → controller → DTO
+2. **Frontend**: Create component → implement CRUD operations → add to navigation
+3. **Database**: Create migration → update seed data if needed
+4. **Testing**: Add unit tests for service layer, integration tests for controllers
+
+### When Modifying Existing Code
+1. Follow existing patterns and conventions
+2. Update related DTOs and mappings
+3. Maintain backward compatibility
+4. Update API documentation
+5. Test all affected functionality
+
+### Code Quality
+- Use meaningful variable and method names
+- Keep methods small and focused
+- Implement proper error handling
+- Add comments for complex business logic
+- Follow consistent formatting and style
+
+## Docker and Deployment
+- Use multi-stage builds for optimization
+- Follow container best practices
+- Use environment variables for configuration
+- Implement proper health checks
+- Use Docker Compose for local development
+
+## Security Considerations
+- Validate all inputs
+- Use proper authentication/authorization
+- Sanitize data before database operations
+- Implement proper CORS configuration
+- Use HTTPS in production
+
+## Performance Guidelines
+- Use pagination for large datasets
+- Implement proper indexing
+- Use connection pooling
+- Optimize database queries
+- Implement caching where appropriate
+- Use lazy loading for related entities
+
+## Testing Strategy
+- Unit tests for service layer
+- Integration tests for controllers
+- Frontend component testing
+- API endpoint testing
+- Database migration testing
+
+## Common Patterns to Follow
+
+### Entity Pattern
+```java
+@Entity
+@Table(name = "table_name")
+public class Entity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    // Audit fields
+    @Column(name = "created_date")
+    private OffsetDateTime createdDate;
+    
+    @PrePersist
+    public void onCreate() {
+        this.createdDate = OffsetDateTime.now();
+    }
+}
+```
+
+### Controller Pattern
+```java
+@RestController
+@RequestMapping("/api/resource")
+public class ResourceController {
+    private final ResourceService service;
+    
+    @GetMapping
+    public List<ResourceDto> list() {
+        return service.list();
+    }
+}
+```
+
+### React Component Pattern
+```javascript
+const Component = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/api/endpoint');
+      setData(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch data');
+    }
+    setLoading(false);
+  }, []);
+  
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+};
+```
+
+## Anti-Patterns to Avoid
+- Don't use field injection in Spring
+- Don't mix business logic in controllers
+- Don't expose entities directly in API responses
+- Don't use global state unnecessarily in React
+- Don't forget error handling in async operations
+- Don't skip validation on user inputs
+- Don't hardcode configuration values
+- Don't ignore security considerations

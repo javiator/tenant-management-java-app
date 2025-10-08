@@ -1,0 +1,139 @@
+---
+description: Java/Spring Boot specific rules and patterns
+globs: ["**/*.java", "**/*.xml", "**/*.sql"]
+alwaysApply: true
+---
+
+# Backend Java/Spring Boot Rules
+
+## Java Standards
+- Use Java 21 features (records, pattern matching, text blocks, sealed classes)
+- Follow Spring Boot 3.3.4 conventions and best practices
+- Use constructor injection over field injection
+- Implement proper exception handling with GlobalExceptionHandler
+- Use @Valid for request validation
+- Follow RESTful API design principles
+- Use proper HTTP status codes (@ResponseStatus)
+
+## Spring Boot Patterns
+
+### Entity Pattern
+```java
+@Entity
+@Table(name = "table_name")
+public class Entity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    // Audit fields
+    @Column(name = "created_date")
+    private OffsetDateTime createdDate;
+    
+    @Column(name = "created_by", length = 50)
+    private String createdBy = "system";
+    
+    @PrePersist
+    public void onCreate() {
+        this.createdDate = OffsetDateTime.now();
+        this.lastUpdated = this.createdDate;
+    }
+    
+    @PreUpdate
+    public void onUpdate() {
+        this.lastUpdated = OffsetDateTime.now();
+    }
+}
+```
+
+### Repository Pattern
+```java
+@Repository
+public interface EntityRepository extends JpaRepository<Entity, Long> {
+    // Custom query methods
+    List<Entity> findByStatus(String status);
+}
+```
+
+### Service Pattern
+```java
+@Service
+@Transactional
+public class EntityService {
+    private final EntityRepository repository;
+    private final EntityMapper mapper;
+    
+    public EntityService(EntityRepository repository, EntityMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
+    
+    public List<EntityDto> list() {
+        return repository.findAll().stream()
+            .map(mapper::toDto)
+            .collect(Collectors.toList());
+    }
+}
+```
+
+### Controller Pattern
+```java
+@RestController
+@RequestMapping("/api/entities")
+public class EntityController {
+    private final EntityService service;
+    
+    public EntityController(EntityService service) {
+        this.service = service;
+    }
+    
+    @GetMapping
+    public List<EntityDto> list() {
+        return service.list();
+    }
+    
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public EntityDto create(@Valid @RequestBody EntityDto dto) {
+        return service.create(dto);
+    }
+}
+```
+
+## Database Standards
+- Use Flyway migrations for schema changes
+- Follow naming conventions (snake_case for columns, camelCase for Java)
+- Implement audit fields (created_date, created_by, last_updated, last_updated_by)
+- Use proper data types and constraints
+- Include proper indexes for performance
+
+## API Design Standards
+- RESTful endpoints with proper HTTP methods
+- Consistent URL patterns (/api/{resource})
+- Proper status codes (200, 201, 204, 400, 404, 500)
+- Use DTOs for request/response mapping
+- Implement proper error responses
+- Include API documentation with Springdoc OpenAPI
+
+## Security Best Practices
+- Validate all inputs with Bean Validation
+- Use proper authentication/authorization
+- Sanitize data before database operations
+- Implement proper CORS configuration
+- Use HTTPS in production
+- Don't expose sensitive information in error messages
+
+## Performance Guidelines
+- Use pagination for large datasets
+- Implement proper indexing
+- Use connection pooling
+- Optimize database queries
+- Implement caching where appropriate
+- Use lazy loading for related entities
+
+## Testing Standards
+- Unit tests for service layer
+- Integration tests for controllers
+- Use @SpringBootTest for integration tests
+- Mock external dependencies
+- Test edge cases and error conditions
