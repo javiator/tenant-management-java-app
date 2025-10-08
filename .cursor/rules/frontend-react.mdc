@@ -1,0 +1,166 @@
+---
+description: React/JavaScript specific rules and patterns
+globs: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx", "**/*.json"]
+alwaysApply: true
+---
+
+# Frontend React Rules
+
+## React Standards
+- Use functional components with hooks
+- Implement proper error handling with toast notifications
+- Use Material-UI components consistently
+- Follow React best practices (keys, proper state updates)
+- Use axios for API calls with proper error handling
+- Implement loading states and user feedback
+- Use controlled components for forms
+- Follow responsive design principles
+
+## Component Patterns
+
+### Functional Component with Hooks
+```javascript
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
+const Component = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get('/api/endpoint');
+      setData(response.data);
+    } catch (err) {
+      setError(err.message);
+      toast.error('Failed to fetch data');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+  
+  if (loading) return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
+  
+  return (
+    <Box>
+      {/* Component content */}
+    </Box>
+  );
+};
+```
+
+### Form Component Pattern
+```javascript
+const FormComponent = ({ onSubmit, initialData = {} }) => {
+  const [form, setForm] = useState(initialData);
+  const [loading, setLoading] = useState(false);
+  
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await onSubmit(form);
+      toast.success('Operation completed successfully');
+    } catch (error) {
+      toast.error('Operation failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Form fields */}
+    </form>
+  );
+};
+```
+
+### Modal Component Pattern
+```javascript
+const ModalComponent = ({ open, onClose, title, children }) => {
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        {children}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="secondary">Cancel</Button>
+        <Button type="submit" variant="contained" color="primary">
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+```
+
+## State Management
+- Use useState for local component state
+- Use useEffect for side effects
+- Use useCallback for memoized functions
+- Use useMemo for expensive calculations
+- Avoid prop drilling - use context when needed
+- Keep state as close to where it's used as possible
+
+## API Communication
+- Use axios for HTTP requests
+- Implement proper error handling
+- Show loading states during requests
+- Provide user feedback for all operations
+- Use consistent error messages
+- Implement retry logic for failed requests
+
+## UI/UX Standards
+- Use Material-UI components consistently
+- Implement responsive design
+- Provide loading states and user feedback
+- Use proper form validation
+- Implement accessibility features
+- Follow consistent styling patterns
+
+## Performance Guidelines
+- Use React.memo for expensive components
+- Implement proper dependency arrays in useEffect
+- Avoid unnecessary re-renders
+- Use lazy loading for large datasets
+- Implement proper pagination
+- Optimize bundle size
+
+## Error Handling
+- Implement global error boundaries
+- Show user-friendly error messages
+- Log errors for debugging
+- Provide retry mechanisms
+- Handle network errors gracefully
+- Validate user inputs
+
+## Testing Standards
+- Write unit tests for components
+- Test user interactions
+- Mock API calls
+- Test error scenarios
+- Test loading states
+- Use React Testing Library
+
+## Code Organization
+- Organize components by feature
+- Use consistent naming conventions
+- Keep components small and focused
+- Extract reusable logic into custom hooks
+- Use proper file structure
+- Implement proper imports and exports

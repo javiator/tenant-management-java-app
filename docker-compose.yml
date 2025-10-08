@@ -1,5 +1,5 @@
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database (only for production)
   db:
     image: postgres:16
     container_name: tenantmgmt_db
@@ -16,25 +16,28 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    networks:
-      - tenant-network
+    profiles:
+      - prod
 
   # Spring Boot Backend
   api:
     build: ./backend
     container_name: tenantmgmt_api
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      DB_URL: jdbc:postgresql://db:5432/tenantdb
-      DB_USER: tenant
-      DB_PASSWORD: tenant
+      # Set profile via environment variable (default: dev with H2)
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
+      # PostgreSQL connection (only used when PROFILE=prod)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tenantdb
+      SPRING_DATASOURCE_USERNAME: tenant
+      SPRING_DATASOURCE_PASSWORD: tenant
     ports:
       - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - tenant-network
+        required: false
+    volumes:
+      - h2-data:/app/data
 
   # React Frontend
   frontend:
@@ -46,12 +49,7 @@ services:
       - REACT_APP_API_URL=http://localhost:8080
     depends_on:
       - api
-    networks:
-      - tenant-network
 
 volumes:
   pgdata:
-
-networks:
-  tenant-network:
-    driver: bridge
+  h2-data:
