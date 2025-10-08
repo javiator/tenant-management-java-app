@@ -2,7 +2,6 @@ package com.example.tenantmanagement.service;
 
 import com.example.tenantmanagement.domain.Property;
 import com.example.tenantmanagement.domain.Tenant;
-import com.example.tenantmanagement.domain.Transaction;
 import com.example.tenantmanagement.repository.PropertyRepository;
 import com.example.tenantmanagement.repository.TenantRepository;
 import com.example.tenantmanagement.repository.TransactionRepository;
