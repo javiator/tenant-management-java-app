@@ -12,7 +12,6 @@ tenant-management-java-app/
 │   ├── Dockerfile
 │   └── docker-compose.yml   # Backend-only compose
 ├── backend-mcp/             # MCP server exposing backend APIs (TypeScript/Node)
-├── backend-mcp-uv/          # MCP server exposing backend APIs (Python/uv)
 ├── frontend/                # React application
 │   ├── src/
 │   ├── public/
@@ -22,6 +21,8 @@ tenant-management-java-app/
 ├── docker-compose.yml       # Full-stack orchestration
 └── README.md
 ```
+
+> The Python/uv MCP server now lives in its own repository (`tenant-management-mcp`). Clone it alongside this project when you need MCP access from Python-based agents.
 
 ## Technology Stack
 
@@ -41,7 +42,7 @@ tenant-management-java-app/
 
 ### MCP Servers
 - **Node.js 20** with TypeScript (`backend-mcp/`) using `@modelcontextprotocol/server`
-- **Python 3.11+** with `uv` (`backend-mcp-uv/`) using the `mcp` FastMCP implementation, `pydantic`, and `httpx`
+- **Python 3.11+** with `uv` (see the separate [`tenant-management-mcp`](https://github.com/javiator/tenant-management-mcp) repo) using the `mcp` FastMCP implementation, `pydantic`, and `httpx`
 
 ## Quick Start
 
@@ -88,7 +89,7 @@ npm install
 cp .env.example .env   # adjust BACKEND_MCP_BASE_URL if needed
 npm run dev            # Starts MCP server on stdio for compatible clients
 
-cd ../backend-mcp-uv
+cd ../tenant-management-mcp
 uv sync
 uv run backend-mcp-uv --transport streamable-http  # HTTP transport for local testing
 ```
