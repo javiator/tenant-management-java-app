@@ -21,7 +21,10 @@ from ..schemas import (
 def register_property_tools(server) -> None:
     """Register property tools on the provided MCP server."""
 
-    @server.tool(name="list_properties", description="Retrieve every property managed by the backend.")
+    @server.tool(
+        name="list_properties",
+        description="Retrieve every property managed by the backend.",
+    )
     async def list_properties() -> list[Property]:
         return await request_json("GET", "/api/properties", adapter=property_list_adapter)
 
