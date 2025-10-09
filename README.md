@@ -11,8 +11,6 @@ tenant-management-java-app/
 │   ├── pom.xml
 │   ├── Dockerfile
 │   └── docker-compose.yml   # Backend-only compose
-├── backend-mcp/             # MCP server exposing backend APIs (TypeScript/Node)
-├── backend-mcp-uv/          # MCP server exposing backend APIs (Python/uv)
 ├── frontend/                # React application
 │   ├── src/
 │   ├── public/
@@ -39,9 +37,6 @@ tenant-management-java-app/
 - **Tailwind CSS** for styling
 - **Nginx** for production serving
 
-### MCP Servers
-- **Node.js 20** with TypeScript (`backend-mcp/`) using `@modelcontextprotocol/server`
-- **Python 3.11+** with `uv` (`backend-mcp-uv/`) using the `mcp` FastMCP implementation, `pydantic`, and `httpx`
 
 ## Quick Start
 
@@ -81,17 +76,6 @@ npm start
 # Frontend runs on http://localhost:3000
 ```
 
-#### MCP Server Only
-```bash
-cd backend-mcp
-npm install
-cp .env.example .env   # adjust BACKEND_MCP_BASE_URL if needed
-npm run dev            # Starts MCP server on stdio for compatible clients
-
-cd ../backend-mcp-uv
-uv sync
-uv run backend-mcp-uv --transport streamable-http  # HTTP transport for local testing
-```
 
 ## API Endpoints
 
@@ -159,13 +143,6 @@ npm install
 npm start
 ```
 
-### MCP Server Development
-```bash
-cd backend-mcp
-npm install
-npm run dev      # hot-reloads with tsx
-npm run build    # produce dist/ output
-```
 
 ### Database Migrations
 - Flyway migrations in `backend/src/main/resources/db/migration/`
