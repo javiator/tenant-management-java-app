@@ -1,0 +1,79 @@
+---
+title: "Information Freshness Requirements"
+description: "Ensures AI agent always uses the most current and up-to-date information"
+priority: 1
+enabled: true
+tags: ["information", "freshness", "current", "up-to-date", "accuracy"]
+alwaysApply: true
+---
+
+# Information Freshness Requirements
+
+## 🔄 Always Use Current Information
+
+### Critical Requirements
+- **CURRENT INFORMATION PRIORITY**: Always prioritize the most current and up-to-date information available
+- **DATE AWARENESS**: Always be aware of the current date and use it as context for information relevance
+- **REAL-TIME DATA**: When providing information about technologies, APIs, or tools, always check for the latest versions and updates
+- **OUTDATED INFORMATION WARNING**: If you detect potentially outdated information, explicitly warn the user and seek current alternatives
+- **VERSION SPECIFICITY**: Always specify version numbers when discussing packages, frameworks, or tools
+- **API CHANGES**: Be aware that APIs and tools change frequently - always recommend checking official documentation for the latest information
+
+## 🔍 Information Verification Strategy
+
+### Source Prioritization
+- **Official Sources First**: Prioritize official documentation, GitHub repositories, and authoritative sources
+- **Recent Updates**: Look for recent updates, changelogs, and release notes
+- **Community Feedback**: Consider recent community discussions and issues when relevant
+- **Breaking Changes**: Always mention potential breaking changes in recent versions
+- **Cross-reference**: When providing technical information, cross-reference multiple current sources
+
+
+## 📅 Response Patterns for Current Information
+
+### Date and Version Context
+- **Date Context**: Include current date context in responses when discussing time-sensitive topics
+
+### Information Freshness Indicators
+- **"As of [current date]"**: Use this phrase when providing time-sensitive information
+
+
+## 🔧 Technology-Specific Freshness
+
+### Python Ecosystem
+- **Python Version**: Always specify current Python version (3.12+)
+- **Package Versions**: Use latest stable versions of packages
+- **Dependency Updates**: Check for dependency updates and compatibility
+- **PEP Updates**: Be aware of recent PEP changes and recommendations
+
+### AI/ML Libraries
+- **Framework Versions**: Use current versions of AI/ML frameworks
+- **API Changes**: Be aware of recent API changes in AI services
+- **Model Updates**: Mention current model versions and capabilities
+- **Provider Updates**: Stay updated on AI provider service changes
+
+### Development Tools
+- **IDE Updates**: Mention current IDE versions and features
+- **Build Tools**: Use current versions of build and deployment tools
+- **Testing Frameworks**: Reference current testing framework versions
+- **CI/CD Tools**: Stay updated on CI/CD tool changes
+
+
+
+## ❌ Anti-Patterns to Avoid
+
+### Outdated Information
+- **Don't rely on old documentation** without checking for updates
+- **Don't ignore version compatibility** issues
+- **Don't provide information** without checking its currency
+
+### Poor Information Practices
+- **Don't guess at current versions** - always verify
+- **Don't ignore breaking changes** in recent updates
+- **Don't provide outdated security information**
+
+
+## 🎯 Key Principles
+
+- **Current First**: Always prioritize current information over convenience
+- **Verification**: Verify information from multiple current sources
