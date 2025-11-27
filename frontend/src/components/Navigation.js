@@ -32,6 +32,7 @@ const Navigation = () => {
     { label: 'Properties', path: '/properties' },
     { label: 'Transactions', path: '/transactions' },
     { label: 'Chat', path: '/chat' },
+    { label: 'About', path: '/about' },
   ];
 
   const handleDrawerToggle = () => {

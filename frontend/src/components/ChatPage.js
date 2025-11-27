@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useChat } from '../context/ChatContext';
 import { Box, TextField, Paper, Typography, IconButton, Divider, Accordion, AccordionSummary, AccordionDetails, useTheme, useMediaQuery, Tabs, Tab, Card, Chip } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
@@ -15,21 +16,15 @@ import toast from 'react-hot-toast';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 const ChatPage = () => {
-    const [messages, setMessages] = useState([]);
+    const { messages, setMessages, canvasHistory, setCanvasHistory, sessionId } = useChat();
     const [input, setInput] = useState('');
-    const [canvasHistory, setCanvasHistory] = useState([]); // Array of { type, content, title, id }
     const [loading, setLoading] = useState(false);
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef(null);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
-    const sessionIdRef = useRef('');
 
-    useEffect(() => {
-        // Generate Session ID on mount
-        sessionIdRef.current = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        scrollToBottom();
-    }, []);
+
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -122,7 +117,7 @@ const ChatPage = () => {
         try {
             const res = await axios.post('/api/chat', {
                 message: input,
-                sessionId: sessionIdRef.current
+                sessionId: sessionId
             });
             const fullResponse = res.data.response;
             let displayResponse = fullResponse;
@@ -259,8 +254,8 @@ const ChatPage = () => {
                     flex: isMobile ? '1 1 100%' : '0 0 500px',
                     display: isMobile ? (activeTab === 0 ? 'flex' : 'none') : 'flex',
                     flexDirection: 'column',
-                    borderRadius: isMobile ? 0 : '24px',
-                    boxShadow: isMobile ? 'none' : 3,
+                    borderRadius: 0,
+                    boxShadow: 'none',
                     overflow: 'hidden'
                 }}>
                     {!isMobile && (
@@ -357,8 +352,8 @@ const ChatPage = () => {
                     flex: 1,
                     display: isMobile ? (activeTab === 1 ? 'flex' : 'none') : 'flex',
                     flexDirection: 'column',
-                    borderRadius: isMobile ? 0 : '24px',
-                    boxShadow: isMobile ? 'none' : 3,
+                    borderRadius: 0,
+                    boxShadow: 'none',
                     overflow: 'hidden'
                 }}>
                     {!isMobile && (

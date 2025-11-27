@@ -14,6 +14,7 @@ const Dashboard = () => {
     properties: 0,
     transactions: 0
   });
+  const [recentTransactions, setRecentTransactions] = useState([]);
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const enableBackup = params.get('download') === 'true';
@@ -24,10 +25,11 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const [tenantsRes, propertiesRes, transactionsRes] = await Promise.all([
+      const [tenantsRes, propertiesRes, transactionsRes, recentTransactionsRes] = await Promise.all([
         axios.get('/api/tenants'),
         axios.get('/api/properties'),
-        axios.get('/api/transactions')
+        axios.get('/api/transactions'),
+        axios.get('/api/transactions?page=1&per_page=5')
       ]);
 
       setStats({
@@ -35,6 +37,7 @@ const Dashboard = () => {
         properties: propertiesRes.data.total || 0,
         transactions: transactionsRes.data.total || 0
       });
+      setRecentTransactions(recentTransactionsRes.data.data || []);
     } catch (error) {
       toast.error('Failed to fetch dashboard statistics');
       console.error('Error fetching stats:', error);
@@ -99,6 +102,7 @@ const Dashboard = () => {
             <Typography variant="h6" gutterBottom fontWeight="bold">Quick Actions</Typography>
             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
               <Button variant="contained" size="small" onClick={() => window.location.href = '/tenants'}>Add Tenant</Button>
+              <Button variant="contained" color="secondary" size="small" onClick={() => window.location.href = '/properties'}>Add Property</Button>
               <Button variant="outlined" size="small" onClick={() => window.location.href = '/transactions'}>Add Transaction</Button>
             </Stack>
           </CardContent>
@@ -111,9 +115,29 @@ const Dashboard = () => {
             action={<Button size="small" onClick={() => window.location.href = '/transactions'}>View All</Button>}
           />
           <CardContent>
-            <Typography variant="body2" color="text.secondary">
-              Latest transactions will appear here.
-            </Typography>
+            {recentTransactions.length === 0 ? (
+              <Typography variant="body2" color="text.secondary">
+                Latest transactions will appear here.
+              </Typography>
+            ) : (
+              <Box>
+                {recentTransactions.map((t) => (
+                  <Box key={t.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1, borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                    <Box>
+                      <Typography variant="body2" fontWeight="bold">
+                        {t.amount} ({t.type})
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {t.transactionDate ? t.transactionDate.slice(0, 10) : ''}
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary">
+                      {t.comments || '-'}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
           </CardContent>
         </Card>
 

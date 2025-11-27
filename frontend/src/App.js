@@ -11,6 +11,9 @@ import Properties from './components/Properties';
 import Transactions from './components/Transactions';
 import Navigation from './components/Navigation';
 import ChatPage from './components/ChatPage';
+import About from './components/About';
+import Footer from './components/Footer';
+import { ChatProvider } from './context/ChatContext';
 
 function AppContent() {
   const location = useLocation();
@@ -18,7 +21,7 @@ function AppContent() {
   const showFab = location.pathname !== '/chat';
 
   return (
-    <div className="App">
+    <div className="App" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navigation />
       <main className={location.pathname === '/chat' ? 'chat-content' : 'main-content'}>
         <Routes>
@@ -26,18 +29,30 @@ function AppContent() {
           <Route path="/tenants" element={<Tenants />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/transactions" element={<Transactions />} />
+          <Route path="/transactions" element={<Transactions />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </main>
+      {location.pathname !== '/chat' && <Footer />}
       <Toaster position="top-right" />
       {showFab && (
         <Fab
           color="primary"
+          variant="extended"
           aria-label="chat"
-          sx={{ position: 'fixed', bottom: 32, right: 32 }}
+          sx={{
+            position: 'fixed',
+            bottom: 100,
+            right: 32,
+            animation: 'pulse 2s infinite',
+            fontWeight: 'bold',
+            px: 3
+          }}
           onClick={() => navigate('/chat')}
         >
-          <ChatIcon />
+          <ChatIcon sx={{ mr: 1 }} />
+          Ask AI Assistant
         </Fab>
       )}
     </div>
@@ -51,7 +66,9 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <AppContent />
+        <ChatProvider>
+          <AppContent />
+        </ChatProvider>
       </Router>
     </ThemeProvider>
   );
