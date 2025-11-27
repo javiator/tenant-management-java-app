@@ -16,6 +16,8 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
+import ApartmentIcon from '@mui/icons-material/Apartment';
+
 const Navigation = () => {
   const location = useLocation();
   const theme = useTheme();
@@ -53,35 +55,56 @@ const Navigation = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" color="primary" elevation={2}>
-        <Toolbar>
+      <AppBar
+        position="static"
+        elevation={0}
+        sx={{
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          height: 48, // Reduced height
+        }}
+      >
+        <Toolbar variant="dense" sx={{ minHeight: 48 }}>
           {isMobile && (
             <IconButton
-              color="inherit"
-              aria-label="open drawer"
               edge="start"
+              color="inherit"
+              aria-label="menu"
               onClick={handleDrawerToggle}
-              sx={{ mr: 2 }}
+              sx={{ mr: 2, color: '#f5f5f7' }}
             >
               <MenuIcon />
             </IconButton>
           )}
 
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            <Link to="/" style={{ color: 'inherit', textDecoration: 'none', fontWeight: 700 }}>
-              Property Management
+          <Typography variant="h6" component="div" sx={{ display: 'flex', alignItems: 'center', mr: 4 }}>
+            <Link to="/" style={{ color: '#f5f5f7', textDecoration: 'none', fontWeight: 500, fontSize: '0.9rem', letterSpacing: '0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ApartmentIcon sx={{ fontSize: 20, opacity: 0.8 }} /> Property Management
             </Link>
           </Typography>
 
           {!isMobile && (
-            <Box sx={{ display: 'flex' }}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
               {navItems.map((item) => (
                 <Button
                   key={item.label}
-                  color={isActive(item.path) ? 'secondary' : 'inherit'}
                   component={Link}
                   to={item.path}
-                  sx={{ fontWeight: isActive(item.path) ? 700 : 400 }}
+                  sx={{
+                    color: '#f5f5f7',
+                    opacity: isActive(item.path) ? 1 : 0.8,
+                    fontSize: '12px',
+                    fontWeight: 400,
+                    letterSpacing: '0.02em',
+                    minWidth: 'auto',
+                    padding: '6px 12px',
+                    transition: 'opacity 0.2s',
+                    '&:hover': {
+                      backgroundColor: 'transparent',
+                      opacity: 1,
+                    }
+                  }}
                 >
                   {item.label}
                 </Button>
@@ -99,7 +122,7 @@ const Navigation = () => {
         }}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240 },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: 240, backgroundColor: '#f5f5f7' },
         }}
       >
         {drawer}

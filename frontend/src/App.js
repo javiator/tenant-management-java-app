@@ -1,4 +1,6 @@
 import React from 'react';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import theme from './theme';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Fab } from '@mui/material';
@@ -18,7 +20,7 @@ function AppContent() {
   return (
     <div className="App">
       <Navigation />
-      <main className="main-content">
+      <main className={location.pathname === '/chat' ? 'chat-content' : 'main-content'}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/tenants" element={<Tenants />} />
@@ -42,11 +44,16 @@ function AppContent() {
   );
 }
 
+
+
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <AppContent />
+      </Router>
+    </ThemeProvider>
   );
 }
 

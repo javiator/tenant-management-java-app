@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, TextField, Paper, Typography, IconButton, Divider, Accordion, AccordionSummary, AccordionDetails, useTheme, useMediaQuery, Tabs, Tab } from '@mui/material';
+import { Box, TextField, Paper, Typography, IconButton, Divider, Accordion, AccordionSummary, AccordionDetails, useTheme, useMediaQuery, Tabs, Tab, Card, Chip } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import StopIcon from '@mui/icons-material/Stop';
@@ -243,9 +243,9 @@ const ChatPage = () => {
     };
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
+        <Box sx={{ p: 0, height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
             {isMobile && (
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'white' }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
                     <Tabs value={activeTab} onChange={handleTabChange} variant="fullWidth">
                         <Tab icon={<ChatIcon />} label="Chat" />
                         <Tab icon={<AssessmentIcon />} label="Canvas" />
@@ -253,24 +253,41 @@ const ChatPage = () => {
                 </Box>
             )}
 
-            <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-                {/* Chat Panel */}
-                <Box sx={{
-                    width: isMobile ? '100%' : '40%',
+            <Box sx={{ display: 'flex', gap: isMobile ? 0 : 3, flexGrow: 1, overflow: 'hidden' }}>
+                {/* Chat Card */}
+                <Card sx={{
+                    flex: isMobile ? '1 1 100%' : '0 0 500px',
                     display: isMobile ? (activeTab === 0 ? 'flex' : 'none') : 'flex',
-                    borderRight: isMobile ? 'none' : '1px solid #ddd',
                     flexDirection: 'column',
-                    bgcolor: '#f8f9fa'
+                    borderRadius: isMobile ? 0 : '24px',
+                    boxShadow: isMobile ? 'none' : 3,
+                    overflow: 'hidden'
                 }}>
-                    <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 2 }}>
+                    {!isMobile && (
+                        <Box sx={{ p: 2, borderBottom: '1px solid rgba(0,0,0,0.05)', bgcolor: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)' }}>
+                            <Typography variant="h6" fontWeight="bold">AI Assistant</Typography>
+                        </Box>
+                    )}
+
+                    <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 2, bgcolor: '#f5f5f7' }}>
                         {messages.length === 0 && (
-                            <Typography variant="body2" sx={{ textAlign: 'center', mt: 4, color: 'gray' }}>
-                                Start a conversation with the AI Agent. <br /> Try "Show me a summary of rents for the last 2 months".
-                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.6 }}>
+                                <ChatIcon sx={{ fontSize: 48, mb: 2, color: 'text.secondary' }} />
+                                <Typography variant="body1" color="text.secondary" align="center">
+                                    How can I help you today?
+                                </Typography>
+                            </Box>
                         )}
                         {messages.map((msg, i) => (
                             <Box key={i} sx={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', mb: 2 }}>
-                                <Paper sx={{ p: 2, bgcolor: msg.role === 'user' ? '#1976d2' : '#fff', color: msg.role === 'user' ? '#fff' : 'inherit', maxWidth: '85%', borderRadius: 2 }}>
+                                <Paper sx={{
+                                    p: 2,
+                                    bgcolor: msg.role === 'user' ? 'primary.main' : '#ffffff',
+                                    color: msg.role === 'user' ? '#fff' : 'text.primary',
+                                    maxWidth: '85%',
+                                    borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                                    boxShadow: msg.role === 'user' ? 2 : 1
+                                }}>
                                     <ReactMarkdown
                                         remarkPlugins={[remarkGfm]}
                                         components={{ a: LinkRenderer }}
@@ -280,75 +297,120 @@ const ChatPage = () => {
                                 </Paper>
                             </Box>
                         ))}
-                        {loading && <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'gray', ml: 2 }}>Agent is thinking...</Typography>}
+                        {loading && (
+                            <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+                                <Paper sx={{ p: 2, bgcolor: '#fff', borderRadius: '20px 20px 20px 4px', boxShadow: 1 }}>
+                                    <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>Thinking...</Typography>
+                                </Paper>
+                            </Box>
+                        )}
                         <div ref={messagesEndRef} />
                     </Box>
-                    <Box sx={{ p: 2, borderTop: '1px solid #ddd', display: 'flex', bgcolor: '#fff' }}>
-                        <TextField
-                            fullWidth
-                            variant="outlined"
-                            placeholder="Type a message..."
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                            disabled={loading}
-                            size="small"
-                            inputRef={inputRef}
-                        />
-                        <IconButton
-                            color={isListening ? "secondary" : "default"}
-                            onClick={toggleListening}
-                            disabled={loading || !recognitionRef.current}
-                        >
-                            {isListening ? <StopIcon /> : <MicIcon />}
-                        </IconButton>
-                        <IconButton color="primary" onClick={handleSend} disabled={loading} sx={{ ml: 1 }}>
-                            <SendIcon />
-                        </IconButton>
+
+                    <Box sx={{ p: 0, bgcolor: '#fff', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#f5f5f7', p: 2 }}>
+                            <input
+                                style={{
+                                    border: 'none',
+                                    background: 'transparent',
+                                    outline: 'none',
+                                    flexGrow: 1,
+                                    fontSize: '16px',
+                                    padding: '8px 0'
+                                }}
+                                placeholder="Type a message..."
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                disabled={loading}
+                                ref={inputRef}
+                            />
+                            <IconButton
+                                color={isListening ? "error" : "default"}
+                                onClick={toggleListening}
+                                disabled={loading || !recognitionRef.current}
+                                size="small"
+                            >
+                                {isListening ? <StopIcon /> : <MicIcon />}
+                            </IconButton>
+                            <IconButton
+                                color="primary"
+                                onClick={handleSend}
+                                disabled={loading}
+                                sx={{
+                                    bgcolor: 'primary.main',
+                                    color: 'white',
+                                    '&:hover': { bgcolor: 'primary.dark' },
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: '50%'
+                                }}
+                            >
+                                <SendIcon fontSize="small" />
+                            </IconButton>
+                        </Box>
                     </Box>
-                </Box>
+                </Card>
 
-                {/* Canvas Panel */}
-                <Box sx={{
-                    width: isMobile ? '100%' : '60%',
-                    display: isMobile ? (activeTab === 1 ? 'block' : 'none') : 'block',
-                    p: 4,
-                    overflowY: 'auto',
-                    bgcolor: '#fff'
+                {/* Canvas Card */}
+                <Card sx={{
+                    flex: 1,
+                    display: isMobile ? (activeTab === 1 ? 'flex' : 'none') : 'flex',
+                    flexDirection: 'column',
+                    borderRadius: isMobile ? 0 : '24px',
+                    boxShadow: isMobile ? 'none' : 3,
+                    overflow: 'hidden'
                 }}>
-                    <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: '#333' }}>Canvas History</Typography>
-                    <Divider sx={{ mb: 3 }} />
-
-                    {canvasHistory.length > 0 ? (
-                        canvasHistory.map((item, index) => (
-                            <Accordion key={item.id} defaultExpanded={index === 0}>
-                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                    <Typography sx={{ fontWeight: 'bold' }}>{item.title} - {new Date(item.id).toLocaleTimeString()}</Typography>
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    {item.type === 'chart' ? (
-                                        renderChart(item.content)
-                                    ) : (
-                                        <Box sx={{
-                                            '& table': { width: '100%', borderCollapse: 'collapse', mt: 2, mb: 2 },
-                                            '& th, & td': { border: '1px solid #e0e0e0', p: 1.5, textAlign: 'left' },
-                                            '& th': { bgcolor: '#f5f5f5', fontWeight: 'bold' },
-                                            '& h1, & h2, & h3': { color: '#1976d2', mt: 2 },
-                                            '& ul, & ol': { pl: 3 }
-                                        }}>
-                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.content}</ReactMarkdown>
-                                        </Box>
-                                    )}
-                                </AccordionDetails>
-                            </Accordion>
-                        ))
-                    ) : (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '50%', opacity: 0.5 }}>
-                            <Typography variant="h6">Empty Canvas</Typography>
-                            <Typography variant="body2">Rich reports and charts will appear here.</Typography>
+                    {!isMobile && (
+                        <Box sx={{ p: 2, borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="h6" fontWeight="bold">Canvas</Typography>
+                            <Chip label={`${canvasHistory.length} Items`} size="small" />
                         </Box>
                     )}
-                </Box>
+
+                    <Box sx={{ flexGrow: 1, overflowY: 'auto', p: isMobile ? 0 : 4, bgcolor: '#ffffff' }}>
+                        {canvasHistory.length > 0 ? (
+                            canvasHistory.map((item, index) => (
+                                <Accordion key={item.id} defaultExpanded={index === 0} sx={{
+                                    mb: isMobile ? 0 : 2,
+                                    boxShadow: 'none',
+                                    border: isMobile ? 'none' : '1px solid rgba(0,0,0,0.08)',
+                                    borderRadius: isMobile ? 0 : '12px !important',
+                                    '&:before': { display: 'none' },
+                                    borderBottom: isMobile ? '1px solid rgba(0,0,0,0.05)' : 'none'
+                                }}>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                        <Typography fontWeight="600">{item.title}</Typography>
+                                        <Typography variant="caption" color="text.secondary" sx={{ ml: 2, alignSelf: 'center' }}>
+                                            {new Date(item.id).toLocaleTimeString()}
+                                        </Typography>
+                                    </AccordionSummary>
+                                    <AccordionDetails sx={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                                        {item.type === 'chart' ? (
+                                            renderChart(item.content)
+                                        ) : (
+                                            <Box sx={{
+                                                '& table': { width: '100%', borderCollapse: 'collapse', mt: 2, mb: 2 },
+                                                '& th, & td': { border: '1px solid #e0e0e0', p: 1.5, textAlign: 'left' },
+                                                '& th': { bgcolor: '#f5f5f7', fontWeight: 'bold', color: 'text.primary' },
+                                                '& h1, & h2, & h3': { color: 'primary.main', mt: 2 },
+                                                '& ul, & ol': { pl: 3 }
+                                            }}>
+                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.content}</ReactMarkdown>
+                                            </Box>
+                                        )}
+                                    </AccordionDetails>
+                                </Accordion>
+                            ))
+                        ) : (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.4 }}>
+                                <AssessmentIcon sx={{ fontSize: 64, mb: 2, color: 'text.secondary' }} />
+                                <Typography variant="h6" color="text.secondary">Canvas is Empty</Typography>
+                                <Typography variant="body2" color="text.secondary">Charts and reports generated by the AI will appear here.</Typography>
+                            </Box>
+                        )}
+                    </Box>
+                </Card>
             </Box>
         </Box>
     );

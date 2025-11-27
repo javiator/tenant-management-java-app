@@ -5,7 +5,7 @@ import TenantTransactionsModal from './TenantTransactionsModal';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
-  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Typography, Pagination, MenuItem, CircularProgress
+  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Typography, Pagination, MenuItem, CircularProgress, useMediaQuery, useTheme, Card, CardContent, Grid, Chip, Stack
 } from '@mui/material';
 import { Edit, Delete, Visibility, Add, Download, ReceiptLong } from '@mui/icons-material';
 
@@ -40,7 +40,11 @@ const Tenants = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
   const perPage = 10;
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
 
   const fetchTenants = useCallback(async () => {
@@ -169,82 +173,155 @@ const Tenants = () => {
   );
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h5">Tenants</Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="contained" color="success" startIcon={<Download />} onClick={handleExportCSV}>Export CSV</Button>
-          <Button variant="contained" color="primary" startIcon={<Add />} onClick={handleAdd}>Add Tenant</Button>
-        </Box>
-      </Box>
-      <TextField
-        label="Search by name or property"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        variant="outlined"
-        size="small"
-        sx={{ mb: 2, width: { xs: '100%', sm: '50%', md: '33%' } }}
-      />
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>
-      ) : (
-        <TableContainer component={Paper} sx={{ mt: 2 }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>ID</TableCell>
-                <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Name</TableCell>
-                <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Property</TableCell>
-                <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Contact No</TableCell>
-                <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Rent</TableCell>
-                <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Contract Expiry Date</TableCell>
-                <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredTenants.map(tenant => (
-                <TableRow key={tenant.id}>
-                  <TableCell>{tenant.id}</TableCell>
-                  <TableCell>
-                    <span>{tenant.name}</span>
-                  </TableCell>
-                  <TableCell>{tenant.propertyAddress}</TableCell>
-                  <TableCell>{tenant.contactNo}</TableCell>
-                  <TableCell>{tenant.rent}</TableCell>
-                  <TableCell>
-                    {(() => {
-                      if (tenant.contractExpiryDate) {
-                        const expiry = new Date(tenant.contractExpiryDate);
-                        const now = new Date();
-                        const twoMonthsFromNow = new Date();
-                        twoMonthsFromNow.setMonth(now.getMonth() + 2);
-                        if (expiry > now && expiry < twoMonthsFromNow) {
-                          return <span style={{ color: 'red', fontWeight: 'bold' }}>{tenant.contractExpiryDate}</span>;
-                        }
-                      }
-                      return tenant.contractExpiryDate;
-                    })()}
-                  </TableCell>
-                  <TableCell>
-                    <IconButton color="primary" onClick={() => handleShowDetails(tenant)} size="small" title="Details" sx={{ mr: 0.5 }}><Visibility /></IconButton>
-                    <IconButton color="info" onClick={() => { setTxTenant({ id: tenant.id, name: tenant.name }); setOpenTxModal(true); }} size="small" title="Transactions" sx={{ mr: 1 }}>
-                      <ReceiptLong />
-                    </IconButton>
-                    <IconButton color="info" onClick={() => handleEdit(tenant)} size="small"><Edit /></IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(tenant.id)} size="small"><Delete /></IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-        <Pagination count={totalPages} page={page} onChange={(_, val) => setPage(val)} color="primary" />
-      </Box>
+    <Box sx={{ p: 3, maxWidth: 1200, margin: '0 auto' }}>
+      <Typography variant="h4" gutterBottom sx={{ mb: 4, fontWeight: 700 }}>Tenants</Typography>
+
+      <Stack spacing={3}>
+        {/* Module 1: Controls */}
+        <Card sx={{ p: 2 }}>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems="center">
+            <TextField
+              label="Search by name or property"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              variant="outlined"
+              size="small"
+              sx={{ width: { xs: '100%', md: 400 } }}
+            />
+            <Box sx={{ display: 'flex', gap: 1, width: { xs: '100%', md: 'auto' }, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+              <Button variant="contained" color="success" startIcon={<Download />} onClick={handleExportCSV}>Export CSV</Button>
+              <Button variant="contained" color="primary" startIcon={<Add />} onClick={handleAdd}>Add Tenant</Button>
+            </Box>
+          </Stack>
+        </Card>
+
+        {/* Module 2: Data */}
+        <Card>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
+          ) : (
+            isMobile ? (
+              <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }} >
+                {
+                  filteredTenants.map(tenant => (
+                    <Card key={tenant.id} variant="outlined" sx={{ boxShadow: 'none', bgcolor: 'background.default' }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {tenant.name}
+                          </Typography>
+                          <Chip label={`ID: ${tenant.id}`} size="small" variant="outlined" />
+                        </Box>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          {tenant.propertyAddress}
+                        </Typography>
+                        <Stack spacing={1} sx={{ mt: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">Contact:</Typography>
+                            <Typography variant="body2">{tenant.contactNo}</Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">Rent:</Typography>
+                            <Typography variant="body2" fontWeight="bold">{tenant.rent}</Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">Expiry:</Typography>
+                            <Typography variant="body2">
+                              {(() => {
+                                if (tenant.contractExpiryDate) {
+                                  const expiry = new Date(tenant.contractExpiryDate);
+                                  const now = new Date();
+                                  const twoMonthsFromNow = new Date();
+                                  twoMonthsFromNow.setMonth(now.getMonth() + 2);
+                                  if (expiry > now && expiry < twoMonthsFromNow) {
+                                    return <span style={{ color: 'red', fontWeight: 'bold' }}>{tenant.contractExpiryDate}</span>;
+                                  }
+                                }
+                                return tenant.contractExpiryDate;
+                              })()}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
+                          <IconButton color="primary" onClick={() => handleShowDetails(tenant)} size="small" title="Details">
+                            <Visibility />
+                          </IconButton>
+                          <IconButton color="info" onClick={() => { setTxTenant({ id: tenant.id, name: tenant.name }); setOpenTxModal(true); }} size="small" title="Transactions">
+                            <ReceiptLong />
+                          </IconButton>
+                          <IconButton color="info" onClick={() => handleEdit(tenant)} size="small">
+                            <Edit />
+                          </IconButton>
+                          <IconButton color="error" onClick={() => handleDelete(tenant.id)} size="small">
+                            <Delete />
+                          </IconButton>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))
+                }
+              </Box>
+            ) : (
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>ID</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Property</TableCell>
+                      <TableCell>Contact No</TableCell>
+                      <TableCell>Rent</TableCell>
+                      <TableCell>Contract Expiry Date</TableCell>
+                      <TableCell>Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredTenants.map(tenant => (
+                      <TableRow key={tenant.id}>
+                        <TableCell>{tenant.id}</TableCell>
+                        <TableCell>
+                          <span>{tenant.name}</span>
+                        </TableCell>
+                        <TableCell>{tenant.propertyAddress}</TableCell>
+                        <TableCell>{tenant.contactNo}</TableCell>
+                        <TableCell>{tenant.rent}</TableCell>
+                        <TableCell>
+                          {(() => {
+                            if (tenant.contractExpiryDate) {
+                              const expiry = new Date(tenant.contractExpiryDate);
+                              const now = new Date();
+                              const twoMonthsFromNow = new Date();
+                              twoMonthsFromNow.setMonth(now.getMonth() + 2);
+                              if (expiry > now && expiry < twoMonthsFromNow) {
+                                return <span style={{ color: 'red', fontWeight: 'bold' }}>{tenant.contractExpiryDate}</span>;
+                              }
+                            }
+                            return tenant.contractExpiryDate;
+                          })()}
+                        </TableCell>
+                        <TableCell>
+                          <IconButton color="primary" onClick={() => handleShowDetails(tenant)} size="small" title="Details" sx={{ mr: 0.5 }}><Visibility /></IconButton>
+                          <IconButton color="info" onClick={() => { setTxTenant({ id: tenant.id, name: tenant.name }); setOpenTxModal(true); }} size="small" title="Transactions" sx={{ mr: 1 }}>
+                            <ReceiptLong />
+                          </IconButton>
+                          <IconButton color="info" onClick={() => handleEdit(tenant)} size="small"><Edit /></IconButton>
+                          <IconButton color="error" onClick={() => handleDelete(tenant.id)} size="small"><Delete /></IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 2, borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+            <Pagination count={totalPages} page={page} onChange={(_, val) => setPage(val)} color="primary" />
+          </Box>
+        </Card>
+      </Stack>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="md" fullWidth>
+      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="sm" fullWidth fullScreen={isMobile}>
         <DialogTitle>{editingId ? 'Edit Tenant' : 'Add Tenant'}</DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' }, gap: 2 }}>
@@ -305,7 +382,7 @@ const Tenants = () => {
         open={openTxModal}
         onClose={() => setOpenTxModal(false)}
       />
-    </Box>
+    </Box >
   );
 };
 

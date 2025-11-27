@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
-  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Typography, Pagination, MenuItem, CircularProgress
+  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Typography, Pagination, MenuItem, CircularProgress, useMediaQuery, useTheme, Card, CardContent, Grid, Chip, Stack
 } from '@mui/material';
 import { Edit, Delete, Add, Download } from '@mui/icons-material';
 
@@ -27,7 +27,11 @@ const Transactions = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
   const perPage = 10;
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
 
   const fetchTransactions = useCallback(async () => {
@@ -166,102 +170,166 @@ const Transactions = () => {
   );
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2 }}>
-        <Typography variant="h4" gutterBottom>Transactions</Typography>
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' } }}>
-          <TextField
-            label="Search by Tenant or Property"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            variant="outlined"
-            size="small"
-            sx={{ width: { xs: '100%', sm: 300 } }}
-          />
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<Add />}
-              onClick={handleAdd}
-            >
-              Add Transaction
-            </Button>
-            <Button
+    <Box sx={{ p: 3, maxWidth: 1200, margin: '0 auto' }}>
+      <Typography variant="h4" gutterBottom sx={{ mb: 4, fontWeight: 700 }}>Transactions</Typography>
+
+      <Stack spacing={3}>
+        {/* Module 1: Controls */}
+        <Card sx={{ p: 2 }}>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} justifyContent="space-between" alignItems="center">
+            <TextField
+              label="Search by Tenant or Property"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
               variant="outlined"
-              color="secondary"
-              startIcon={<Download />}
-              onClick={handleExportCSV}
-            >
-              Export CSV
-            </Button>
-          </Box>
-        </Box>
-      </Box>
-      <TableContainer component={Paper} sx={{ mb: 2 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>ID</TableCell>
-              <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Tenant</TableCell>
-              <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Property</TableCell>
-              <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Amount</TableCell>
-              <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Date</TableCell>
-              <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Type</TableCell>
-              <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }}>Remarks</TableCell>
-              <TableCell sx={{ backgroundColor: '#f1f1f1', color: '#374151', fontWeight: 600, fontSize: '1rem' }} align="right">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center">
-                  <CircularProgress size={24} />
-                </TableCell>
-              </TableRow>
-            ) : filteredTransactions.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} align="center">
-                  No transactions found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredTransactions.map((t) => {
-                const tenant = tenants.find(ten => ten.id === t.tenantId);
-                const property = properties.find(prop => prop.id === t.propertyId);
-                return (
-                  <TableRow key={t.id}>
-                    <TableCell>{t.id}</TableCell>
-                    <TableCell>{tenant ? tenant.name : t.tenantId}</TableCell>
-                    <TableCell>{property ? property.address : t.propertyId}</TableCell>
-                    <TableCell>{t.amount}</TableCell>
-                    <TableCell>{t.transactionDate ? t.transactionDate : ''}</TableCell>
-                    <TableCell>{t.type}</TableCell>
-                    <TableCell>{t.comments || ''}</TableCell>
-                    <TableCell align="right">
-                      <IconButton color="primary" onClick={() => handleEdit(t)} size="small">
-                        <Edit />
-                      </IconButton>
-                      <IconButton color="error" onClick={() => handleDelete(t.id)} size="small">
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
+              size="small"
+              sx={{ width: { xs: '100%', md: 400 } }}
+            />
+            <Box sx={{ display: 'flex', gap: 1, width: { xs: '100%', md: 'auto' }, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<Add />}
+                onClick={handleAdd}
+              >
+                Add Transaction
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                startIcon={<Download />}
+                onClick={handleExportCSV}
+              >
+                Export CSV
+              </Button>
+            </Box>
+          </Stack>
+        </Card>
+
+        {/* Module 2: Data */}
+        <Card>
+          {isMobile ? (
+            <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}><CircularProgress /></Box>
+              ) : filteredTransactions.length === 0 ? (
+                <Typography align="center" sx={{ p: 4 }}>No transactions found.</Typography>
+              ) : (
+                filteredTransactions.map((t) => {
+                  const tenant = tenants.find(ten => ten.id === t.tenantId);
+                  const property = properties.find(prop => prop.id === t.propertyId);
+                  return (
+                    <Card key={t.id} variant="outlined" sx={{ boxShadow: 'none', bgcolor: 'background.default' }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            {tenant ? tenant.name : t.tenantId}
+                          </Typography>
+                          <Chip
+                            label={t.type}
+                            size="small"
+                            color={t.type === 'rent' ? 'primary' : t.type === 'payment_received' ? 'success' : 'default'}
+                            variant="outlined"
+                          />
+                        </Box>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          {property ? property.address : t.propertyId}
+                        </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                          <Typography variant="h6" color="primary">
+                            {t.amount}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {t.transactionDate ? t.transactionDate : ''}
+                          </Typography>
+                        </Box>
+                        {t.comments && (
+                          <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic', bgcolor: 'background.default', p: 1, borderRadius: 1 }}>
+                            "{t.comments}"
+                          </Typography>
+                        )}
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
+                          <IconButton color="primary" onClick={() => handleEdit(t)} size="small">
+                            <Edit />
+                          </IconButton>
+                          <IconButton color="error" onClick={() => handleDelete(t.id)} size="small">
+                            <Delete />
+                          </IconButton>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Tenant</TableCell>
+                    <TableCell>Property</TableCell>
+                    <TableCell>Amount</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Remarks</TableCell>
+                    <TableCell align="right">Actions</TableCell>
                   </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-        <Pagination
-          count={totalPages}
-          page={page}
-          onChange={(_, value) => setPage(value)}
-          color="primary"
-        />
-      </Box>
-      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="sm" fullWidth>
+                </TableHead>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center">
+                        <CircularProgress size={24} />
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredTransactions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} align="center">
+                        No transactions found.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredTransactions.map((t) => {
+                      const tenant = tenants.find(ten => ten.id === t.tenantId);
+                      const property = properties.find(prop => prop.id === t.propertyId);
+                      return (
+                        <TableRow key={t.id}>
+                          <TableCell>{t.id}</TableCell>
+                          <TableCell>{tenant ? tenant.name : t.tenantId}</TableCell>
+                          <TableCell>{property ? property.address : t.propertyId}</TableCell>
+                          <TableCell>{t.amount}</TableCell>
+                          <TableCell>{t.transactionDate ? t.transactionDate : ''}</TableCell>
+                          <TableCell>{t.type}</TableCell>
+                          <TableCell>{t.comments || ''}</TableCell>
+                          <TableCell align="right">
+                            <IconButton color="primary" onClick={() => handleEdit(t)} size="small">
+                              <Edit />
+                            </IconButton>
+                            <IconButton color="error" onClick={() => handleDelete(t.id)} size="small">
+                              <Delete />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 2, borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+              color="primary"
+            />
+          </Box>
+        </Card>
+      </Stack>
+      <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="sm" fullWidth fullScreen={isMobile}>
         <DialogTitle>{editingId ? 'Edit Transaction' : 'Add Transaction'}</DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent>
