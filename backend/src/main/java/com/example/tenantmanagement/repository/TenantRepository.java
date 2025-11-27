@@ -7,12 +7,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface TenantRepository extends JpaRepository<Tenant, Long> {
-    
-    @Query("SELECT t FROM Tenant t LEFT JOIN FETCH t.property")
-    List<Tenant> findAllWithProperty();
-    
+
+    @Query(value = "SELECT t FROM Tenant t LEFT JOIN FETCH t.property", countQuery = "SELECT count(t) FROM Tenant t")
+    org.springframework.data.domain.Page<Tenant> findAllWithProperty(org.springframework.data.domain.Pageable pageable);
+
     @Query("SELECT t FROM Tenant t LEFT JOIN FETCH t.property WHERE t.id = :id")
     Tenant findByIdWithProperty(@Param("id") Long id);
 }
-
-

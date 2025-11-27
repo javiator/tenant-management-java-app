@@ -5,6 +5,10 @@ import com.example.tenantmanagement.repository.PropertyRepository;
 import com.example.tenantmanagement.repository.TransactionRepository;
 import com.example.tenantmanagement.web.dto.PropertyDto;
 import com.example.tenantmanagement.web.dto.TransactionDto;
+import com.example.tenantmanagement.web.dto.PaginatedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +26,10 @@ public class PropertyService {
         this.transactionRepository = transactionRepository;
     }
 
-    public List<PropertyDto> list() {
-        return repo.findAll().stream().map(Mapping::toDto).collect(Collectors.toList());
+    public PaginatedResponse<PropertyDto> list(int page, int size) {
+        Page<Property> result = repo.findAll(PageRequest.of(page - 1, size, Sort.by("id").descending()));
+        List<PropertyDto> dtos = result.getContent().stream().map(Mapping::toDto).collect(Collectors.toList());
+        return new PaginatedResponse<>(dtos, result.getTotalPages(), result.getNumber() + 1, result.getTotalElements());
     }
 
     public PropertyDto create(PropertyDto dto) {
@@ -40,9 +46,12 @@ public class PropertyService {
 
     public PropertyDto update(Long id, PropertyDto dto) {
         Property e = repo.findById(id).orElseThrow();
-        if (dto.address != null) e.setAddress(dto.address);
-        if (dto.rent != null) e.setRent(dto.rent);
-        if (dto.maintenance != null) e.setMaintenance(dto.maintenance);
+        if (dto.address != null)
+            e.setAddress(dto.address);
+        if (dto.rent != null)
+            e.setRent(dto.rent);
+        if (dto.maintenance != null)
+            e.setMaintenance(dto.maintenance);
         return Mapping.toDto(repo.save(e));
     }
 
@@ -56,5 +65,3 @@ public class PropertyService {
                 .collect(Collectors.toList());
     }
 }
-
-

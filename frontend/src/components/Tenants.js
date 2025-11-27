@@ -47,8 +47,7 @@ const Tenants = () => {
     setLoading(true);
     try {
       const res = await axios.get(`/api/tenants?page=${page}&per_page=${perPage}`);
-      let tenantsArr = Array.isArray(res.data) ? res.data : (res.data.tenants || []);
-      setTenants(tenantsArr);
+      setTenants(res.data.data || []);
       setTotalPages(res.data.pages || 1);
     } catch (e) {
       toast.error('Failed to fetch tenants');
@@ -59,7 +58,7 @@ const Tenants = () => {
   const fetchProperties = useCallback(async () => {
     try {
       const res = await axios.get(`/api/properties?page=1&per_page=1000`);
-      setProperties(res.data.properties || res.data || []);
+      setProperties(res.data.data || []);
     } catch (e) {
       toast.error('Failed to fetch properties');
     }
@@ -83,7 +82,8 @@ const Tenants = () => {
   };
 
   const handleEdit = (tenant) => {
-    setForm({ ...tenant,
+    setForm({
+      ...tenant,
       passportValidity: tenant.passportValidity ? tenant.passportValidity.slice(0, 10) : '',
       moveInDate: tenant.moveInDate ? tenant.moveInDate.slice(0, 10) : '',
       contractStartDate: tenant.contractStartDate ? tenant.contractStartDate.slice(0, 10) : '',
@@ -170,10 +170,10 @@ const Tenants = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2 }}>
         <Typography variant="h5">Tenants</Typography>
-        <Box>
-          <Button variant="contained" color="success" startIcon={<Download />} onClick={handleExportCSV} sx={{ mr: 1 }}>Export CSV</Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button variant="contained" color="success" startIcon={<Download />} onClick={handleExportCSV}>Export CSV</Button>
           <Button variant="contained" color="primary" startIcon={<Add />} onClick={handleAdd}>Add Tenant</Button>
         </Box>
       </Box>

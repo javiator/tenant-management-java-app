@@ -30,6 +30,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tenantdb
       SPRING_DATASOURCE_USERNAME: tenant
       SPRING_DATASOURCE_PASSWORD: tenant
+      # Gemini Configuration
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
     ports:
       - "8080:8080"
     depends_on:

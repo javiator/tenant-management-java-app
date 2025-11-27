@@ -33,7 +33,7 @@ const Properties = () => {
     setLoading(true);
     try {
       const res = await axios.get(`/api/properties?page=${page}&per_page=${perPage}`);
-      setProperties(res.data.properties || res.data || []);
+      setProperties(res.data.data || []);
       setTotalPages(res.data.pages || 1);
     } catch (e) {
       toast.error('Failed to fetch properties');
@@ -93,8 +93,8 @@ const Properties = () => {
 
   const handleExportCSV = () => {
     const csvRows = [
-  ['ID', 'Address', 'Rent', 'Maintenance', 'Created Date'],
-  ...properties.map(p => [p.id, p.address, p.rent, p.maintenance, p.created_date])
+      ['ID', 'Address', 'Rent', 'Maintenance', 'Created Date'],
+      ...properties.map(p => [p.id, p.address, p.rent, p.maintenance, p.created_date])
     ];
     const csvContent = csvRows.map(r => r.map(x => '"' + (x || '') + '"').join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -117,10 +117,10 @@ const Properties = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2 }}>
         <Typography variant="h5">Properties</Typography>
-        <Box>
-          <Button variant="contained" color="success" startIcon={<Download />} onClick={handleExportCSV} sx={{ mr: 1 }}>Export CSV</Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button variant="contained" color="success" startIcon={<Download />} onClick={handleExportCSV}>Export CSV</Button>
           <Button variant="contained" color="primary" startIcon={<Add />} onClick={handleAdd}>Add Property</Button>
         </Box>
       </Box>
@@ -189,7 +189,7 @@ const Properties = () => {
       </Dialog>
 
       {/* Transactions Dialog */}
-      <PropertyTransactionsModal 
+      <PropertyTransactionsModal
         open={openTransactions}
         propertyId={selectedProperty ? selectedProperty.id : null}
         propertyAddress={selectedProperty ? selectedProperty.address : ''}

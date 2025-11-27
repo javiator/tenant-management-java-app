@@ -4,22 +4,25 @@
   "description": "Frontend for Tenant Management System",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/icons-material": "^5.14.17",
+    "@mui/material": "^5.15.14",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.4.0",
+    "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.3.0",
-    "react-scripts": "5.0.1",
-    "axios": "^1.4.0",
     "react-hook-form": "^7.43.9",
     "react-hot-toast": "^2.4.0",
-    "lucide-react": "^0.263.1",
-    "web-vitals": "^2.1.4",
-    "@mui/material": "^5.15.14",
-    "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.5",
-    "@mui/icons-material": "^5.14.17"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^6.3.0",
+    "react-scripts": "5.0.1",
+    "recharts": "^3.5.0",
+    "remark-gfm": "^4.0.1",
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -47,8 +50,8 @@
   },
   "proxy": "http://localhost:8080",
   "devDependencies": {
-    "tailwindcss": "^3.4.3",
+    "autoprefixer": "^10.4.16",
     "postcss": "^8.4.38",
-    "autoprefixer": "^10.4.16"
+    "tailwindcss": "^3.4.3"
   }
 }

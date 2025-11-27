@@ -1,6 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Box,
+  CircularProgress,
+  IconButton
+} from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 
 const PropertyTransactionsModal = ({ propertyId, propertyAddress, onClose, open }) => {
   const [transactions, setTransactions] = useState([]);
@@ -8,9 +27,9 @@ const PropertyTransactionsModal = ({ propertyId, propertyAddress, onClose, open 
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    if (propertyId) fetchTransactions();
+    if (propertyId && open) fetchTransactions();
     // eslint-disable-next-line
-  }, [propertyId]);
+  }, [propertyId, open]);
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -25,49 +44,65 @@ const PropertyTransactionsModal = ({ propertyId, propertyAddress, onClose, open 
     setLoading(false);
   };
 
-  if (!propertyId || !open) return null;
+  if (!propertyId) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-      <div className="bg-white p-6 rounded-xl w-full max-w-3xl relative">
-        <button className="absolute top-2 right-2 text-gray-500" onClick={onClose}>✕</button>
-        <h2 className="text-xl font-bold mb-4">Transactions for {propertyAddress}</h2>
-        {loading ? <p>Loading...</p> : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tenant</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">For Month</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {transactions.map(tx => (
-                  <tr key={tx.id}>
-                    <td>{tx.tenantName}</td>
-                    <td>{tx.type}</td>
-                    <td>{tx.forMonth}</td>
-                    <td>{tx.amount}</td>
-                    <td>{tx.transactionDate}</td>
-                    <td>{tx.comments}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6">Transactions for {propertyAddress}</Typography>
+        <IconButton onClick={onClose} size="small"><CloseIcon /></IconButton>
+      </DialogTitle>
+      <DialogContent dividers>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <>
+            <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Tenant</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Type</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>For Month</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Amount</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>Comments</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {transactions.length > 0 ? (
+                    transactions.map((tx) => (
+                      <TableRow key={tx.id}>
+                        <TableCell>{tx.tenantName}</TableCell>
+                        <TableCell>{tx.type}</TableCell>
+                        <TableCell>{tx.forMonth}</TableCell>
+                        <TableCell>{tx.amount}</TableCell>
+                        <TableCell>{tx.transactionDate}</TableCell>
+                        <TableCell>{tx.comments}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">No transactions found</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+              <Typography variant="h6">
+                Total Balance: <span style={{ color: total < 0 ? 'red' : 'green' }}>{total}</span>
+              </Typography>
+            </Box>
+          </>
         )}
-        <div className="mt-6 flex justify-between items-center">
-          <div className="text-lg font-bold text-gray-800">
-            Total Balance: <span className={total < 0 ? 'text-red-600' : 'text-green-600'}>{total}</span>
-          </div>
-          <button className="bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-full" onClick={onClose}>Close</button>
-        </div>
-      </div>
-    </div>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="primary">Close</Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

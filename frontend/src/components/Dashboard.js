@@ -31,9 +31,9 @@ const Dashboard = () => {
       ]);
 
       setStats({
-        tenants: tenantsRes.data.total || tenantsRes.data.length || 0,
-        properties: propertiesRes.data.length || 0,
-        transactions: transactionsRes.data.length || 0
+        tenants: tenantsRes.data.total || 0,
+        properties: propertiesRes.data.total || 0,
+        transactions: transactionsRes.data.total || 0
       });
     } catch (error) {
       toast.error('Failed to fetch dashboard statistics');

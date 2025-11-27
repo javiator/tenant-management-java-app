@@ -34,8 +34,7 @@ const Transactions = () => {
     setLoading(true);
     try {
       const res = await axios.get(`/api/transactions?page=${page}&per_page=${perPage}`);
-      let txArr = Array.isArray(res.data) ? res.data : (res.data.transactions || []);
-      setTransactions(txArr);
+      setTransactions(res.data.data || []);
       setTotalPages(res.data.pages || 1);
     } catch (e) {
       toast.error('Failed to fetch transactions');
@@ -46,7 +45,7 @@ const Transactions = () => {
   const fetchTenants = useCallback(async () => {
     try {
       const res = await axios.get(`/api/tenants?page=1&per_page=1000`);
-      setTenants(res.data.tenants || res.data || []);
+      setTenants(res.data.data || []);
     } catch (e) {
       toast.error('Failed to fetch tenants');
     }
@@ -55,7 +54,7 @@ const Transactions = () => {
   const fetchProperties = useCallback(async () => {
     try {
       const res = await axios.get(`/api/properties?page=1&per_page=1000`);
-      setProperties(res.data.properties || res.data || []);
+      setProperties(res.data.data || []);
     } catch (e) {
       toast.error('Failed to fetch properties');
     }
@@ -168,34 +167,35 @@ const Transactions = () => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h4" gutterBottom>Transactions</Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-        <TextField
-          label="Search by Tenant or Property"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          variant="outlined"
-          size="small"
-          sx={{ width: 300 }}
-        />
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<Add />}
-            onClick={handleAdd}
-            sx={{ mr: 1 }}
-          >
-            Add Transaction
-          </Button>
-          <Button
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', mb: 2, gap: 2 }}>
+        <Typography variant="h4" gutterBottom>Transactions</Typography>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, width: { xs: '100%', sm: 'auto' } }}>
+          <TextField
+            label="Search by Tenant or Property"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
             variant="outlined"
-            color="secondary"
-            startIcon={<Download />}
-            onClick={handleExportCSV}
-          >
-            Export CSV
-          </Button>
+            size="small"
+            sx={{ width: { xs: '100%', sm: 300 } }}
+          />
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Add />}
+              onClick={handleAdd}
+            >
+              Add Transaction
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              startIcon={<Download />}
+              onClick={handleExportCSV}
+            >
+              Export CSV
+            </Button>
+          </Box>
         </Box>
       </Box>
       <TableContainer component={Paper} sx={{ mb: 2 }}>
@@ -296,7 +296,7 @@ const Transactions = () => {
               label="Property"
               name="propertyId"
               value={form.propertyId}
-              onChange={() => {}}
+              onChange={() => { }}
               fullWidth
               margin="normal"
               required

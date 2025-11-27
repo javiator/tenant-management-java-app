@@ -7,9 +7,14 @@ import com.example.tenantmanagement.repository.PropertyRepository;
 import com.example.tenantmanagement.repository.TenantRepository;
 import com.example.tenantmanagement.repository.TransactionRepository;
 import com.example.tenantmanagement.web.dto.TransactionDto;
+import com.example.tenantmanagement.web.dto.PaginatedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,14 +25,24 @@ public class TransactionService {
     private final PropertyRepository propertyRepository;
     private final TenantRepository tenantRepository;
 
-    public TransactionService(TransactionRepository repo, PropertyRepository propertyRepository, TenantRepository tenantRepository) {
+    public TransactionService(TransactionRepository repo, PropertyRepository propertyRepository,
+            TenantRepository tenantRepository) {
         this.repo = repo;
         this.propertyRepository = propertyRepository;
         this.tenantRepository = tenantRepository;
     }
 
-    public List<TransactionDto> list() {
-        return repo.findAll().stream().map(Mapping::toDto).collect(Collectors.toList());
+    public PaginatedResponse<TransactionDto> list(int page, int size) {
+        Page<Transaction> result = repo
+                .findAllWithRelations(PageRequest.of(page - 1, size, Sort.by("id").descending()));
+        List<TransactionDto> dtos = result.getContent().stream().map(Mapping::toDto).collect(Collectors.toList());
+        return new PaginatedResponse<>(dtos, result.getTotalPages(), result.getNumber() + 1, result.getTotalElements());
+    }
+
+    public List<TransactionDto> searchTransactions(LocalDate startDate, LocalDate endDate) {
+        return repo.findByDateRange(startDate, endDate).stream()
+                .map(Mapping::toDto)
+                .collect(Collectors.toList());
     }
 
     public TransactionDto create(TransactionDto dto) {
@@ -61,12 +76,13 @@ public class TransactionService {
         } else {
             e.setTenant(null);
         }
-        if (dto.type != null) e.setType(dto.type);
+        if (dto.type != null)
+            e.setType(dto.type);
         e.setForMonth(dto.forMonth);
-        if (dto.amount != null) e.setAmount(dto.amount);
-        if (dto.transactionDate != null) e.setTransactionDate(dto.transactionDate);
+        if (dto.amount != null)
+            e.setAmount(dto.amount);
+        if (dto.transactionDate != null)
+            e.setTransactionDate(dto.transactionDate);
         e.setComments(dto.comments);
     }
 }
-
-

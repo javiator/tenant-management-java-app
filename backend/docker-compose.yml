@@ -28,6 +28,8 @@ services:
       DB_URL: jdbc:postgresql://db:5432/tenantdb
       DB_USER: tenant
       DB_PASSWORD: tenant
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
     ports:
       - "8080:8080"
 
