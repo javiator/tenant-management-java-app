@@ -67,8 +67,8 @@ npx serve -s build
 
 ```bash
 # Build and run with Docker
-docker build -t tenant-management-frontend .
-docker run -p 3000:3000 tenant-management-frontend
+npm run docker:build
+npm run docker:run
 ```
 
 ## Features
@@ -479,10 +479,10 @@ zcat frontend.log.gz | grep ERROR
 ### Development
 ```bash
 # Build development image
-docker build -t tenant-frontend-dev .
+npm run docker:build
 
-# Run with volume mounting
-docker run -p 3000:3000 -v $(pwd)/src:/app/src tenant-frontend-dev
+# Run with volume mounting and host connection
+npm run docker:run
 ```
 
 ### Production

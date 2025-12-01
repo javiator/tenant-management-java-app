@@ -164,8 +164,9 @@ docker compose up
 
 # Frontend only (requires backend running)
 cd frontend
-docker build -t tenant-frontend .
-docker run -p 3000:3000 tenant-frontend
+npm run docker:build
+npm run docker:run
+# Frontend runs on http://localhost:3000
 ```
 
 ## Configuration
