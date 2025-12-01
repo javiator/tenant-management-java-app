@@ -15,24 +15,30 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    profiles:
+      - prod
 
   api:
     build: .
-    container_name: tenantmgmt_api
+    container_name: tenantmgmt_api_mod
     depends_on:
       db:
         condition: service_healthy
+        required: false
     environment:
-      SPRING_PROFILES_ACTIVE: prod
-      POSTGRES_URL: jdbc:postgresql://db:5432/tenantdb
-      POSTGRES_USER: tenant
-      POSTGRES_PASSWORD: tenant
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
+      POSTGRES_URL: ${POSTGRES_URL:-jdbc:postgresql://db:5432/tenantdb}
+      POSTGRES_USER: ${POSTGRES_USER:-tenant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tenant}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
     ports:
       - "8080:8080"
+    volumes:
+      - h2-data:/app/data
 
 volumes:
   pgdata:
+  h2-data:
 
 

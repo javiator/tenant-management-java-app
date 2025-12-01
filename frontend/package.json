@@ -30,7 +30,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "docker:build": "docker build -t tenant-frontend-dev .",
-    "docker:run": "docker run -d -p 3000:3000 -v $(pwd)/src:/app/src --env-file .env tenant-frontend-dev"
+    "docker:run": "docker run -d -p 3000:3000 -v $(pwd)/src:/app/src --add-host=host.docker.internal:host-gateway --env-file .env tenant-frontend-dev"
   },
   "eslintConfig": {
     "extends": [
