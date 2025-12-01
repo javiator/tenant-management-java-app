@@ -181,9 +181,25 @@ docker compose up
 PROFILE=prod docker compose up
 ```
 
+### Setting up the API Key
+To use the AI features, you need to provide a Google Gemini API key.
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+2. Edit `.env` and add your key:
+   ```properties
+   GEMINI_API_KEY=your_actual_api_key_here
+   ```
+3. Docker Compose will automatically read this file.
+
 ### Environment Variables
 - `PROFILE`: `dev` (default, H2) or `prod` (PostgreSQL)
 - `REACT_APP_API_URL`: Backend API URL for frontend
+- `POSTGRES_URL`: JDBC URL for PostgreSQL (default: `jdbc:postgresql://db:5432/tenantdb`)
+- `POSTGRES_USER`: Database username (default: `tenant`)
+- `POSTGRES_PASSWORD`: Database password (default: `tenant`)
 
 ### Database Configuration
 - **Development**: H2 file-based database (automatic)

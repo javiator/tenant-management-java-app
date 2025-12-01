@@ -12,7 +12,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tenant -d tenantdb"]
+      test: [ "CMD-SHELL", "pg_isready -U tenant -d tenantdb" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -23,16 +23,15 @@ services:
   api:
     build: ./backend
     container_name: tenantmgmt_api
+    env_file:
+      - .env
     environment:
       # Set profile via environment variable (default: dev with H2)
       SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
-      # PostgreSQL connection (only used when PROFILE=prod)
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tenantdb
-      SPRING_DATASOURCE_USERNAME: tenant
-      SPRING_DATASOURCE_PASSWORD: tenant
-      # Gemini Configuration
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
+      # Database Configuration (Production)
+      POSTGRES_URL: ${POSTGRES_URL:-jdbc:postgresql://db:5432/tenantdb}
+      POSTGRES_USER: ${POSTGRES_USER:-tenant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tenant}
     ports:
       - "8080:8080"
     depends_on:
@@ -50,6 +49,7 @@ services:
       - "3000:3000"
     environment:
       - REACT_APP_API_URL=http://localhost:8080
+      - BACKEND_URL=http://api:8080
     depends_on:
       - api
 

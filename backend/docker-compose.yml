@@ -1,4 +1,3 @@
-
 services:
   db:
     image: postgres:16
@@ -12,7 +11,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tenant -d tenantdb"]
+      test: [ "CMD-SHELL", "pg_isready -U tenant -d tenantdb" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -25,9 +24,9 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      DB_URL: jdbc:postgresql://db:5432/tenantdb
-      DB_USER: tenant
-      DB_PASSWORD: tenant
+      POSTGRES_URL: jdbc:postgresql://db:5432/tenantdb
+      POSTGRES_USER: tenant
+      POSTGRES_PASSWORD: tenant
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
     ports:
