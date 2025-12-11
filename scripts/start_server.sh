@@ -5,4 +5,8 @@ source /etc/environment
 echo "Starting Java application..."
 cd /home/ec2-user/app
 nohup java -jar tenant-management-0.0.1-SNAPSHOT.jar > /home/ec2-user/app/app.log 2>&1 &
+echo "Reloading Nginx (Frontend)..."
+systemctl reload nginx
+
 echo "App started with PID $!"
+
