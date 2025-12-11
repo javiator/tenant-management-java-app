@@ -1,0 +1,44 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI_BACKEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/tenant-management-backend
+      - REPOSITORY_URI_FRONTEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/tenant-management-frontend
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - echo Build started on `date`
+      # Backend Build
+      - echo Building Backend...
+      - cd backend
+      - mvn clean package -DskipTests
+      - docker build -t $REPOSITORY_URI_BACKEND:latest .
+      - docker tag $REPOSITORY_URI_BACKEND:latest $REPOSITORY_URI_BACKEND:$IMAGE_TAG
+      - cd ..
+      # Frontend Build
+      - echo Building Frontend...
+      - cd frontend
+      - npm install
+      - npm run build
+      - docker build -t $REPOSITORY_URI_FRONTEND:latest .
+      - docker tag $REPOSITORY_URI_FRONTEND:latest $REPOSITORY_URI_FRONTEND:$IMAGE_TAG
+      - cd ..
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing Docker images...
+      - docker push $REPOSITORY_URI_BACKEND:latest
+      - docker push $REPOSITORY_URI_BACKEND:$IMAGE_TAG
+      - docker push $REPOSITORY_URI_FRONTEND:latest
+      - docker push $REPOSITORY_URI_FRONTEND:$IMAGE_TAG
+      - echo Writing image definitions...
+      - printf '[{"name":"backend-container","imageUri":"%s"}]' $REPOSITORY_URI_BACKEND:$IMAGE_TAG > backend-imagedefs.json
+      - printf '[{"name":"frontend-container","imageUri":"%s"}]' $REPOSITORY_URI_FRONTEND:$IMAGE_TAG > frontend-imagedefs.json
+artifacts:
+  files:
+    - backend-imagedefs.json
+    - frontend-imagedefs.json

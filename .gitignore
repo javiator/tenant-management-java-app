@@ -121,3 +121,10 @@ jspm_packages/
 # Temporary files
 *.tmp
 *.temp
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfplan
