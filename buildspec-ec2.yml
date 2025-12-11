@@ -16,7 +16,7 @@ phases:
       # 2. Build Frontend
       - echo "Building Frontend..."
       - cd frontend
-      - npm ci
+      - npm install
       - npm run build
       - cd ..
       
