@@ -72,6 +72,13 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
           "ecs:*"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole"
+        ]
+        Resource = "*"
       }
     ]
   })

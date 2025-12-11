@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '../context/ChatContext';
-import { Box, TextField, Paper, Typography, IconButton, Divider, Accordion, AccordionSummary, AccordionDetails, useTheme, useMediaQuery, Tabs, Tab, Card, Chip } from '@mui/material';
+import { Box, Paper, Typography, IconButton, Accordion, AccordionSummary, AccordionDetails, useTheme, useMediaQuery, Tabs, Tab, Card, Chip } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 import StopIcon from '@mui/icons-material/Stop';

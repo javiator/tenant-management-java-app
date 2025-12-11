@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Box, Typography, Grid, Card, CardContent, CardHeader, Avatar, Button, Stack } from '@mui/material';
+import { Box, Typography, Card, CardContent, CardHeader, Avatar, Button, Stack } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';

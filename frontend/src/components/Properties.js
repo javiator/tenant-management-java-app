@@ -5,9 +5,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
-  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Typography, Pagination, CircularProgress, useMediaQuery, useTheme, Card, CardContent, Grid, Stack, Chip
+  Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Typography, Pagination, CircularProgress, useMediaQuery, useTheme, Card, CardContent, Stack, Chip
 } from '@mui/material';
-import { Edit, Delete, Add, Download, Visibility, ReceiptLong } from '@mui/icons-material';
+import { Edit, Delete, Add, Download, ReceiptLong } from '@mui/icons-material';
 import PropertyTransactionsModal from './PropertyTransactionsModal';
 
 const initialForm = {
