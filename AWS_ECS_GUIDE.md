@@ -42,7 +42,7 @@ Since we use **Terraform** (Infrastructure as Code), you can save money by destr
 ### 🔥 Cleanup (Destroy)
 **Cost:** $0/hour after completion.
 
-run this command in `infrastructure/terraform` folder:
+run this command in `infrastructure/terraform-ecs` folder:
 
 ```bash
 terraform destroy
