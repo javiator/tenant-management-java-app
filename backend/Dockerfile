@@ -2,6 +2,7 @@
 FROM public.ecr.aws/amazoncorretto/amazoncorretto:21 AS build
 WORKDIR /workspace
 COPY . .
+RUN yum install -y tar gzip
 RUN ./mvnw -q -e -DskipTests package || mvn -q -DskipTests package
 
 FROM public.ecr.aws/amazoncorretto/amazoncorretto:21
