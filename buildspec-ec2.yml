@@ -1,0 +1,34 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+      nodejs: 18
+  build:
+    commands:
+      # 1. Build Backend
+      - echo "Building Backend..."
+      - cd backend
+      - ./mvnw clean package -DskipTests
+      - cd ..
+      
+      # 2. Build Frontend
+      - echo "Building Frontend..."
+      - cd frontend
+      - npm ci
+      - npm run build
+      - cd ..
+      
+      # 3. Create Artifact Layout
+      - echo "Preparing artifacts..."
+      # Ensure scripts are executable
+      - chmod +x scripts/*.sh
+
+artifacts:
+  files:
+    - backend/target/tenant-management-0.0.1-SNAPSHOT.jar
+    - frontend/build/**/*
+    - appspec.yml
+    - scripts/**/*
+  discard-paths: no
