@@ -1,6 +1,7 @@
 # Build stage
-FROM node:18-alpine as build
+FROM public.ecr.aws/docker/library/node:18 AS build
 
+ENV CI=false
 WORKDIR /app
 
 # Copy package files
@@ -16,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM public.ecr.aws/docker/library/nginx:alpine
 
 # Copy built app to nginx
 COPY --from=build /app/build /usr/share/nginx/html
