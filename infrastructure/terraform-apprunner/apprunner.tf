@@ -66,9 +66,9 @@ resource "aws_apprunner_service" "frontend" {
       image_identifier      = "383226947124.dkr.ecr.us-east-1.amazonaws.com/tenant-management-frontend:latest"
       image_repository_type = "ECR"
       image_configuration {
-        port = "80"
+        port = "3000"
         runtime_environment_variables = {
-          REACT_APP_API_URL = "https://${aws_apprunner_service.backend.service_url}"
+          BACKEND_URL = "https://${aws_apprunner_service.backend.service_url}"
           # Note: App Runner requires HTTPS for the service URL
         }
       }
