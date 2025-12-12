@@ -24,12 +24,12 @@ resource "aws_launch_template" "app" {
     security_groups             = [aws_security_group.app_sg.id]
   }
 
-  # User Data: Install Java 21, Nginx, CodeDeploy Agent, and set global env vars
+  # User Data: Install Java 21, Nginx, CodeDeploy Agent, CloudWatch Agent
   user_data = base64encode(<<-EOF
               #!/bin/bash
               # 1. Update and Install Dependencies
               dnf update -y
-              dnf install -y java-21-amazon-corretto-headless ruby wget nginx
+              dnf install -y java-21-amazon-corretto-headless ruby wget nginx amazon-cloudwatch-agent
 
               # 2. Configure Nginx (Reverse Proxy)
               # Remove default config
@@ -71,7 +71,42 @@ resource "aws_launch_template" "app" {
               systemctl enable codedeploy-agent
               systemctl start codedeploy-agent
 
-              # 5. Set Environment Variables (Persist in /etc/environment)
+              # 5. Configure CloudWatch Agent
+              cat > /opt/aws/amazon-cloudwatch-agent/bin/config.json << 'CW_CONF'
+              {
+                "agent": {
+                  "run_as_user": "root"
+                },
+                "logs": {
+                  "logs_collected": {
+                    "files": {
+                      "collect_list": [
+                        {
+                          "file_path": "/home/ec2-user/app/app.log",
+                          "log_group_name": "ec2-app-logs-${var.environment}",
+                          "log_stream_name": "{instance_id}"
+                        },
+                        {
+                          "file_path": "/var/log/nginx/access.log",
+                          "log_group_name": "ec2-nginx-access-${var.environment}",
+                          "log_stream_name": "{instance_id}"
+                        },
+                         {
+                          "file_path": "/var/log/nginx/error.log",
+                          "log_group_name": "ec2-nginx-error-${var.environment}",
+                          "log_stream_name": "{instance_id}"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+              CW_CONF
+
+              # Start CW Agent
+              /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/bin/config.json
+
+              # 6. Set Environment Variables (Persist in /etc/environment)
               echo "SPRING_PROFILES_ACTIVE=prod" >> /etc/environment
               echo "POSTGRES_URL=jdbc:postgresql://${aws_db_instance.default.endpoint}/${var.db_name}" >> /etc/environment
               echo "POSTGRES_USER=${var.db_username}" >> /etc/environment

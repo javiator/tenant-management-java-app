@@ -41,10 +41,10 @@ resource "aws_security_group" "app_sg" {
   # Ingress: Allow traffic ONLY from the ALB
   ingress {
     protocol        = "tcp"
-    from_port       = 8080
-    to_port         = 8080
+    from_port       = 80
+    to_port         = 80
     security_groups = [aws_security_group.alb_sg.id]
-    description     = "Allow 8080 from ALB"
+    description     = "Allow 80 (Nginx) from ALB"
   }
 
   # Ingress: Allow SSH from nowhere (for now/SSM is preferred) or specific Admin IP
