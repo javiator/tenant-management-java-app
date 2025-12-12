@@ -1,6 +1,8 @@
 #!/bin/bash
 # Source environment variables for the current session (CodeDeploy agent runs as root/custom user)
+set -a
 source /etc/environment
+set +a
 
 echo "Starting Java application..."
 cd /home/ec2-user/app
