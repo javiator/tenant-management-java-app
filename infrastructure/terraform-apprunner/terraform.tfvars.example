@@ -1,0 +1,15 @@
+aws_region   = "us-east-1"
+project_name = "tenant-management"
+environment  = "apprunner-demo"
+vpc_cidr     = "10.0.0.0/16"
+
+# GitHub
+github_repo_id     = "javiator/tenant-management-java-app"
+github_branch_name = "feature/aws-apprunner-deployment"
+
+# Secrets (Replace these before applying in prod!)
+db_username    = "postgres"
+db_password    = "ChangeMe123!" 
+gemini_api_key = "CHANGE_ME_API_KEY"
+gemini_model   = "gemini-1.5-flash"
+

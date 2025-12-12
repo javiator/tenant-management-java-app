@@ -1,0 +1,41 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPO_URI_BACKEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/tenant-management-backend
+      - REPO_URI_FRONTEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/tenant-management-frontend
+      - IMAGE_TAG=latest
+      - GIT_SHA_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      # Build Backend
+      - echo Build started on `date`
+      - echo Building the Backend Docker image...
+      - cd backend
+      - ./mvnw clean package -DskipTests
+      - docker build -t $REPO_URI_BACKEND:latest -t $REPO_URI_BACKEND:$GIT_SHA_TAG .
+      - cd ..
+
+      # Build Frontend
+      - echo Building the Frontend Docker image...
+      - cd frontend
+      - npm install
+      - npm run build
+      - docker build -t $REPO_URI_FRONTEND:latest -t $REPO_URI_FRONTEND:$GIT_SHA_TAG .
+      - cd ..
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPO_URI_BACKEND:latest
+      - docker push $REPO_URI_BACKEND:$GIT_SHA_TAG
+      - docker push $REPO_URI_FRONTEND:latest
+      - docker push $REPO_URI_FRONTEND:$GIT_SHA_TAG
+      - echo Writing image definitions file...
+      - printf '[{"name":"backend","imageUri":"%s"},{"name":"frontend","imageUri":"%s"}]' $REPO_URI_BACKEND:latest $REPO_URI_FRONTEND:latest > imagedefinitions.json
+artifacts:
+  files:
+    - imagedefinitions.json
