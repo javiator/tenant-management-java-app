@@ -9,7 +9,15 @@ Deployment of the Tenant Management System using AWS App Runner.
 
 ## Architecture
 
+![App Runner Architecture](generated-diagrams/apprunner_architecture.png)
+
 We use AWS App Runner for a fully managed container deployment, connected to a private RDS PostgreSQL database via a VPC Connector.
+
+### Network Flow
+1.  **User Access**: Users access the Frontend via the public App Runner URL (HTTPS/443).
+2.  **Frontend-to-Backend**: The Frontend container (React/Nginx) proxies API requests (`/api/...`) to the Backend App Runner service's public endpoint.
+3.  **Backend-to-Database**: The Backend service connects to the RDS instance in the Private Subnet. Traffic flows through the **App Runner VPC Connector**, ensuring secure internal access.
+4.  **Outbound Access**: The Backend accesses external APIs (e.g., Gemini AI) via the VPC Connector -> NAT Gateway -> Internet Gateway.
 
 ### Components
 1.  **VPC (`apprunner-demo-vpc`)**:
