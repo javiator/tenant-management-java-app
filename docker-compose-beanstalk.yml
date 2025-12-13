@@ -20,13 +20,14 @@ services:
       - SPRING_DATASOURCE_PASSWORD
       - GEMINI_API_KEY
       - GEMINI_MODEL
-  
+
   frontend:
     image: FRONTEND_IMAGE_PLACEHOLDER
     ports:
       - "80:3000"
     environment:
       - BACKEND_URL=http://api:8080
+      - DNS_RESOLVER=127.0.0.11
       # Internal Docker network communication
     depends_on:
       - api
