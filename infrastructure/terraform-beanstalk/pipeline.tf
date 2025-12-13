@@ -1,6 +1,6 @@
 # --- S3 Artifact Bucket ---
 resource "aws_s3_bucket" "pipeline_artifacts" {
-  bucket = "codepipeline-apprunner-${var.environment}-${data.aws_caller_identity.current.account_id}"
+  bucket = "codepipeline-beanstalk-${var.environment}-${data.aws_caller_identity.current.account_id}"
   # force_destroy = true # Careful in prod
 }
 
@@ -46,6 +46,23 @@ resource "aws_iam_role_policy" "codepipeline_policy" {
         Effect   = "Allow"
         Action   = ["codestar-connections:UseConnection"]
         Resource = aws_codestarconnections_connection.github.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "elasticbeanstalk:*",
+          "ec2:*",
+          "elasticloadbalancing:*",
+          "autoscaling:*",
+          "cloudwatch:*",
+          "s3:*",
+          "sns:*",
+          "cloudformation:*",
+          "rds:*",
+          "sqs:*",
+          "ecs:*"
+        ]
+        Resource = "*"
       }
     ]
   })
@@ -109,7 +126,7 @@ resource "aws_codestarconnections_connection" "github" {
 # --- CodeBuild Project ---
 resource "aws_codebuild_project" "build" {
   name          = "build-${var.environment}"
-  description   = "Builds Docker images for App Runner"
+  description   = "Builds Docker images for Elastic Beanstalk"
   build_timeout = "15"
   service_role  = aws_iam_role.codebuild_role.arn
 
