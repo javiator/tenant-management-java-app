@@ -1,63 +1,68 @@
 # AWS Elastic Beanstalk Deployment Guide
 
-## Overview
-This guide documents the deployment of the Tenant Management System using **AWS Elastic Beanstalk (Docker Platform)**. This approach uses a `docker-compose.yml` file to orchestrate the Backend and Frontend containers on instances managed by Elastic Beanstalk.
+Deployment of the Tenant Management System using AWS Elastic Beanstalk (Docker Platform).
+
+**Deployed URL:**
+- **Application**: [http://beanstalk-env.eba-bbgvurme.us-east-1.elasticbeanstalk.com](http://beanstalk-env.eba-bbgvurme.us-east-1.elasticbeanstalk.com)
 
 ## Architecture
--   **VPC**: `beanstalk-env-vpc` with Public and Private Subnets.
--   **Database**: RDS PostgreSQL 16.6 (`db.t4g.micro`) in Private Subnets.
--   **Compute**: Elastic Beanstalk Environment `beanstalk-env` running **Docker on Amazon Linux 2023**.
-    -   Instance Type: `t3.medium` (Managed by Auto Scaling).
-    -   Load Balancer: Application Load Balancer (ALB).
--   **CI/CD**: AWS CodePipeline + CodeBuild.
-    -   Source: GitHub (`feature/aws-beanstalk-deployment`).
-    -   Build: CodeBuild builds Docker images, pushes to ECR, and generates `docker-compose.yml`.
-    -   Deploy: CodePipeline deploys the `docker-compose.yml` to Elastic Beanstalk.
 
 ![Elastic Beanstalk Architecture](generated-diagrams/beanstalk_architecture.png)
 
-## Deployment Steps
+We use AWS Elastic Beanstalk Running Docker on Amazon Linux 2023 to orchestrate the backend and frontend containers, connected to a private RDS PostgreSQL database.
+
+### Network Flow
+1.  **User Access**: Users access the Application via the Elastic Beanstalk Load Balancer (ALB).
+2.  **Load Balancer to Instance**: The ALB distributes traffic to the Docker instances in Public Subnets (or Private if configured, currently Public for simplicity in demo).
+3.  **Container Routing**: The instance runs Nginx (or Docker Proxy) mapping external port 80 to the containers.
+    -   Frontend listens on port `3000`.
+    -   Backend listens on port `8080`.
+4.  **Backend-to-Database**: The Backend container connects to the RDS instance in the Private Subnet. Traffic runs securely within the VPC.
+5.  **Outbound Access**: The containers access external APIs (e.g., Gemini AI) via the NAT Gateway.
+
+### Components
+1.  **VPC (`beanstalk-env-vpc`)**:
+    -   **Public Subnets**: Hosts NAT Gateway and Beanstalk Load Balancer.
+    -   **Private Subnets**: Hosts RDS Database and (optionally) Beanstalk Instances.
+2.  **Elastic Beanstalk Environment (`beanstalk-env`)**:
+    -   **Platform**: Docker on Amazon Linux 2023.
+    -   **Orchestration**: `docker-compose.yml` defines the multi-container setup.
+    -   **Auto Scaling**: Automatically provisions and manages EC2 instances.
+3.  **Database**: Amazon RDS PostgreSQL (`db.t4g.micro`) in private subnet.
+4.  **CI/CD**: AWS CodePipeline + CodeBuild.
+    -   Source: GitHub (`feature/aws-beanstalk-deployment`).
+    -   Build: CodeBuild Creates Docker images -> Pushes to ECR -> Generates `docker-compose.yml`.
+    -   Deploy: CodePipeline passes the `docker-compose.yml` to Elastic Beanstalk for deployment.
+
+## Deployment Instructions
 
 ### 1. Prerequisites
--   AWS CLI configured.
--   Terraform installed.
--   GitHub connection ARN available.
+-   **GitHub Connection**: Connection ARN configured in Terraform variables.
+-   **Secrets**: Update `terraform.tfvars` with `db_password` and `gemini_api_key`.
 
-### 2. Infrastructure Provisioning (Terraform)
-The infrastructure is defined in `infrastructure/terraform-beanstalk`.
-
+### 2. Infrastructure Provisioning
+Run Terraform to create all resources:
 ```bash
 cd infrastructure/terraform-beanstalk
 terraform init
 terraform apply
 ```
 
-This creates:
--   VPC & Networking.
--   RDS Database (Username/Password set in `terraform.tfvars`).
--   ECR Repositories.
--   Elastic Beanstalk Application & Environment.
--   CodePipeline & CodeBuild Project.
+### 3. Pipeline & Deployment
+Once Terraform finishes:
+1.  Navigate to **AWS CodePipeline** console.
+2.  The pipeline `pipeline-beanstalk-env` will start automatically.
+3.  Use the Beanstalk Console to monitor environment health ("Green").
 
-### 3. Application Configuration
--   **Environment Variables**: Configured in `beanstalk.tf` -> `aws:elasticbeanstalk:application:environment`.
-    -   `SPRING_PROFILES_ACTIVE=prod`
-    -   `SPRING_DATASOURCE_URL`, `USERNAME`, `PASSWORD`
-    -   `GEMINI_API_KEY`, `GEMINI_MODEL`
--   **Docker Compose**: The `buildspec-beanstalk.yml` dynamically generates a `docker-compose.yml` with the correct ECR image URIs during the build phase. This file is then passed to Elastic Beanstalk.
+### 4. Accessing the Application
+-   Visit the URL: [http://beanstalk-env.eba-bbgvurme.us-east-1.elasticbeanstalk.com](http://beanstalk-env.eba-bbgvurme.us-east-1.elasticbeanstalk.com)
 
 ## Verification
--   **Environment URL**: `http://beanstalk-env.eba-bbgvurme.us-east-1.elasticbeanstalk.com` (Example)
--   **Health Check**: Access root URL or `/health` endpoint of frontend.
+1.  **Logs**: View application logs via Beanstalk Console -> Logs -> Request Last 100 Lines.
+2.  **Database**: Backend connects via `jdbc:postgresql://<rds-endpoint>:5432/tenant_db`.
 
-## Key Files
--   `infrastructure/terraform-beanstalk/`: Terraform configuration.
--   `buildspec-beanstalk.yml`: Build instructions for CodeBuild.
--   `docker-compose-beanstalk.yml`: Template for the Docker Compose file used by Beanstalk.
-
-## Troubleshooting
--   **Logs**:
-    -   Go to Elastic Beanstalk Console -> `beanstalk-env` -> Logs -> Request Last 100 Lines.
-    -   Full logs available in S3 (if configured) or CloudWatch Logs (if enabled).
--   **Database Connectivity**:
-    -   The EC2 instances are in Public/Private subnets (depending on config) but access RDS via the `db-sg` allowing traffic from `beanstalk-ec2-sg`.
+## Cleanup
+To destroy resources:
+```bash
+terraform destroy
+```
