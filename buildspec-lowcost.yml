@@ -12,8 +12,10 @@ phases:
   build:
     commands:
       - echo Building Backend...
+      - cd backend
       - docker build -t $REPO_BACKEND:$IMAGE_TAG .
       - docker tag $REPO_BACKEND:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_BACKEND:$IMAGE_TAG
+      - cd ..
       - echo Building Frontend...
       - cd frontend
       - docker build -t $REPO_FRONTEND:$IMAGE_TAG .
