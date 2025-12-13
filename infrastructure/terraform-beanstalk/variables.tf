@@ -47,8 +47,4 @@ variable "gemini_api_key" {
   sensitive   = true
 }
 
-variable "gemini_api_key" {
-  description = "API Key for Gemini Service"
-  type        = string
-  sensitive   = true
-}
+

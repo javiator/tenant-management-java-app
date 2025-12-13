@@ -6,7 +6,7 @@ resource "aws_elastic_beanstalk_application" "app" {
 resource "aws_elastic_beanstalk_environment" "env" {
   name                = var.environment
   application         = aws_elastic_beanstalk_application.app.name
-  solution_stack_name = "64bit Amazon Linux 2023 v4.4.1 running Docker"
+  solution_stack_name = "64bit Amazon Linux 2023 v4.8.0 running Docker"
   # Check latest solution stack name if possible, or use regex data source
 
   setting {

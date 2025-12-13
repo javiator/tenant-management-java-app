@@ -1,0 +1,2 @@
+db_password    = "CHANGE_ME_TO_SECURE_PASSWORD"
+gemini_api_key = "CHANGE_ME_TO_ACTUAL_API_KEY"
