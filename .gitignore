@@ -121,3 +121,7 @@ jspm_packages/
 # Temporary files
 *.tmp
 *.temp
+infrastructure/**/*.tfvars
+*.tfvars
+**/.terraform/
+**/.terraform.lock.hcl
