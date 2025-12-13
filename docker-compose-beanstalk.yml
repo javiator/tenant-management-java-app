@@ -1,0 +1,32 @@
+services:
+  api:
+    image: BACKEND_IMAGE_PLACEHOLDER
+    ports:
+      - "8080"
+    environment:
+      # These will be populated by System Environment Variables in Beanstalk
+      # But we need to pass them through or rely on Spring expecting them.
+      # If Spring runs in the container, it sees container env vars.
+      # Beanstalk passes configured env vars to the docker engine? 
+      # On AL2023, "Environment properties are passed to the containers"
+      - SPRING_PROFILES_ACTIVE=prod
+      # We don't need to list all if we map them? 
+      # Actually, Beanstalk passes env vars to the `docker compose` process.
+      # Use variable substitution to pass them to container if needed?
+      # Or just let them inherit?
+      # Explicitly passing common ones:
+      - SPRING_DATASOURCE_URL
+      - SPRING_DATASOURCE_USERNAME
+      - SPRING_DATASOURCE_PASSWORD
+      - GEMINI_API_KEY
+      - GEMINI_MODEL
+  
+  frontend:
+    image: FRONTEND_IMAGE_PLACEHOLDER
+    ports:
+      - "80:3000"
+    environment:
+      - BACKEND_URL=http://api:8080
+      # Internal Docker network communication
+    depends_on:
+      - api

@@ -1,0 +1,49 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto21
+      nodejs: 18
+  pre_build:
+    commands:
+      - echo "Checking Java Version..."
+      - java -version
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPO_URI_BACKEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/tenant-management-backend
+      - REPO_URI_FRONTEND=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/tenant-management-frontend
+      - IMAGE_TAG=latest
+      - GIT_SHA_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      # Build Backend
+      - echo Building the Backend Docker image...
+      - cd backend
+      - ./mvnw clean package -DskipTests
+      - docker build -t $REPO_URI_BACKEND:latest -t $REPO_URI_BACKEND:$GIT_SHA_TAG .
+      - cd ..
+
+      # Build Frontend
+      - echo Building the Frontend Docker image...
+      - cd frontend
+      - npm install
+      - npm run build
+      - docker build -t $REPO_URI_FRONTEND:latest -t $REPO_URI_FRONTEND:$GIT_SHA_TAG .
+      - cd ..
+  post_build:
+    commands:
+      - echo Pushing the Docker images...
+      - docker push $REPO_URI_BACKEND:latest
+      - docker push $REPO_URI_BACKEND:$GIT_SHA_TAG
+      - docker push $REPO_URI_FRONTEND:latest
+      - docker push $REPO_URI_FRONTEND:$GIT_SHA_TAG
+      
+      # Generate docker-compose.yml for Beanstalk
+      - echo Generating docker-compose.yml for deployment...
+      - sed -e "s|BACKEND_IMAGE_PLACEHOLDER|$REPO_URI_BACKEND:$GIT_SHA_TAG|g" -e "s|FRONTEND_IMAGE_PLACEHOLDER|$REPO_URI_FRONTEND:$GIT_SHA_TAG|g" docker-compose-beanstalk.yml > docker-compose.yml
+      - cat docker-compose.yml
+
+artifacts:
+  files:
+    - docker-compose.yml
