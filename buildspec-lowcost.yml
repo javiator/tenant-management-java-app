@@ -1,0 +1,43 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPO_BACKEND=tenant-management-backend-lowcost-env
+      - REPO_FRONTEND=tenant-management-frontend-lowcost-env
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - echo Building Backend...
+      - docker build -t $REPO_BACKEND:$IMAGE_TAG .
+      - docker tag $REPO_BACKEND:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_BACKEND:$IMAGE_TAG
+      - echo Building Frontend...
+      - cd frontend
+      - docker build -t $REPO_FRONTEND:$IMAGE_TAG .
+      - docker tag $REPO_FRONTEND:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_FRONTEND:$IMAGE_TAG
+      - cd ..
+  post_build:
+    commands:
+      - echo Pushing images to ECR...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_BACKEND:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_FRONTEND:$IMAGE_TAG
+      - echo "Generating docker-compose.yml for deployment..."
+      - export BACKEND_IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_BACKEND:$IMAGE_TAG
+      - export FRONTEND_IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPO_FRONTEND:$IMAGE_TAG
+      - |
+        sed -e "s|\${BACKEND_IMAGE_URI}|$BACKEND_IMAGE_URI|g" \
+            -e "s|\${FRONTEND_IMAGE_URI}|$FRONTEND_IMAGE_URI|g" \
+            docker-compose-lowcost.yml > docker-compose.yml
+      - echo "Files for artifact:"
+      - cat docker-compose.yml
+      - ls -R scripts/
+
+artifacts:
+  files:
+    - docker-compose.yml
+    - appspec.yml
+    - scripts/start_server.sh
+  discard-paths: no

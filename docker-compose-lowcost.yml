@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:16
+    container_name: tenant-db
+    restart: always
+    environment:
+      POSTGRES_DB: tenant_db
+      POSTGRES_USER: tenant_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tenant-net
+
+  api:
+    image: ${BACKEND_IMAGE_URI}
+    container_name: tenant-backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tenant_db
+      SPRING_DATASOURCE_USERNAME: tenant_user
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL_ID: gemini-1.5-flash
+    ports:
+      - "8080:8080"
+    networks:
+      - tenant-net
+
+  frontend:
+    image: ${FRONTEND_IMAGE_URI}
+    container_name: tenant-frontend
+    restart: always
+    depends_on:
+      - api
+    environment:
+      DNS_RESOLVER: 127.0.0.11
+    ports:
+      - "80:3000"
+    networks:
+      - tenant-net
+
+networks:
+  tenant-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
