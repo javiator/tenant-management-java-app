@@ -28,7 +28,7 @@ resource "aws_apprunner_service" "backend" {
           SPRING_DATASOURCE_USERNAME = var.db_username
           SPRING_DATASOURCE_PASSWORD = var.db_password
           GEMINI_API_KEY             = var.gemini_api_key
-          GEMINI_MODEL_ID            = var.gemini_model
+          GEMINI_MODEL               = var.gemini_model
         }
       }
     }
