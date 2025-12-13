@@ -22,13 +22,20 @@ AWS_REGION=$REGION
 AWS_LOG_GROUP=/app/$ENV_NAME
 EOF
 
+echo "Checking for Docker Compose..."
+if ! command -v docker-compose &> /dev/null; then
+    echo "Docker Compose not found. Installing..."
+    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+fi
+
 echo "Logging into ECR..."
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
 echo "Starting Application..."
-docker compose -f docker-compose.yml pull
-docker compose -f docker-compose.yml up -d --remove-orphans
+/usr/local/bin/docker-compose -f docker-compose.yml pull
+/usr/local/bin/docker-compose -f docker-compose.yml up -d --remove-orphans
 
 echo "Pruning old images..."
 docker image prune -a -f --filter "until=24h"
