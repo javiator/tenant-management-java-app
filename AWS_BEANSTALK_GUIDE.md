@@ -14,6 +14,8 @@ This guide documents the deployment of the Tenant Management System using **AWS 
     -   Build: CodeBuild builds Docker images, pushes to ECR, and generates `docker-compose.yml`.
     -   Deploy: CodePipeline deploys the `docker-compose.yml` to Elastic Beanstalk.
 
+![Elastic Beanstalk Architecture](generated-diagrams/beanstalk_architecture.png)
+
 ## Deployment Steps
 
 ### 1. Prerequisites
