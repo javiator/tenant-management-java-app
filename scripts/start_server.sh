@@ -18,6 +18,8 @@ echo "Creating .env file..."
 cat <<EOF > .env
 DB_PASSWORD=$DB_PASSWORD
 GEMINI_API_KEY=$GEMINI_API_KEY
+AWS_REGION=$REGION
+AWS_LOG_GROUP=/app/$ENV_NAME
 EOF
 
 echo "Logging into ECR..."

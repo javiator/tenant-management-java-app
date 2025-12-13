@@ -11,6 +11,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - tenant-net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION}
+        awslogs-group: ${AWS_LOG_GROUP}
+        awslogs-stream: db
 
   api:
     image: ${BACKEND_IMAGE_URI}
@@ -29,6 +35,12 @@ services:
       - "8080:8080"
     networks:
       - tenant-net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION}
+        awslogs-group: ${AWS_LOG_GROUP}
+        awslogs-stream: api
 
   frontend:
     image: ${FRONTEND_IMAGE_URI}
@@ -42,6 +54,12 @@ services:
       - "80:3000"
     networks:
       - tenant-net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION}
+        awslogs-group: ${AWS_LOG_GROUP}
+        awslogs-stream: frontend
 
 networks:
   tenant-net:
