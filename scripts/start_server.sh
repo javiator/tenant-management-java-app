@@ -4,14 +4,14 @@ set -e
 REGION="us-east-1"
 ENV_NAME="lowcost-env"
 
-cd /home/ec2-user/app
+cd /home/ubuntu/app
 
 echo "Fetching parameters from SSM..."
 DB_PASSWORD=$(aws ssm get-parameter --name "/$ENV_NAME/db_password" --with-decryption --query "Parameter.Value" --output text --region $REGION)
 GEMINI_API_KEY=$(aws ssm get-parameter --name "/$ENV_NAME/gemini_api_key" --with-decryption --query "Parameter.Value" --output text --region $REGION)
 
 echo "Changing ownership of app directory..."
-chown -R ec2-user:ec2-user /home/ec2-user/app
+chown -R ubuntu:ubuntu /home/ubuntu/app
 
 echo "Creating .env file..."
 # We write to a temporary file then move it to avoid permission issues if run as root but consumed by user
