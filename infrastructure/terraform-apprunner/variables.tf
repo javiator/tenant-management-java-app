@@ -36,7 +36,7 @@ variable "github_branch_name" {
 
 
 variable "gemini_model" {
-  description = "Gemini Model ID to use (e.g., gemini-1.5-flash)"
+  description = "Gemini Model ID to use (e.g., gemini-2.5-flash)"
   type        = string
-  default     = "gemini-1.5-flash"
+  default     = "gemini-2.5-flash"
 }
