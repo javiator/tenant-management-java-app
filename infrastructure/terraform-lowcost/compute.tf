@@ -64,18 +64,67 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role = aws_iam_role.ec2_role.name
 }
 
-resource "aws_instance" "app_server" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = var.instance_type
-  subnet_id              = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.instance_sg.id]
-  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+resource "aws_launch_template" "app_server" {
+  name_prefix   = "${var.environment}-app-"
+  image_id      = data.aws_ami.ubuntu.id
+  instance_type = var.instance_type
 
-  user_data = file("user_data.sh")
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2_profile.name
+  }
+
+  network_interfaces {
+    associate_public_ip_address = true
+    security_groups             = [aws_security_group.instance_sg.id]
+    subnet_id                   = aws_subnet.public.id
+  }
+
+  user_data = base64encode(file("user_data.sh"))
+
+  # Spot instance configuration
+  instance_market_options {
+    market_type = "spot"
+    spot_options {
+      max_price                      = "" # Use on-demand price as max
+      spot_instance_type             = "persistent"
+      instance_interruption_behavior = "stop" # Stop instead of terminate
+    }
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name            = "${var.environment}-app-server"
+      CodeDeployGroup = "${var.environment}-deployment-group"
+      Environment     = var.environment
+      ManagedBy       = "Terraform"
+      Project         = "tenant-management"
+      InstanceType    = "spot"
+    }
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+    tags = {
+      Name        = "${var.environment}-app-server-volume"
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+    }
+  }
+}
+
+resource "aws_instance" "app_server" {
+  launch_template {
+    id      = aws_launch_template.app_server.id
+    version = "$Latest"
+  }
 
   tags = {
-    Name = "${var.environment}-app-server"
-    # Tag for CodeDeploy to find this instance
+    Name            = "${var.environment}-app-server"
     CodeDeployGroup = "${var.environment}-deployment-group"
+    Environment     = var.environment
+    ManagedBy       = "Terraform"
+    Project         = "tenant-management"
+    InstanceType    = "spot"
   }
 }
