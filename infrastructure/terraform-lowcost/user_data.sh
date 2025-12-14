@@ -1,6 +1,11 @@
 #!/bin/bash
 apt-get update -y
-apt-get install -y ca-certificates curl gnupg ruby wget
+apt-get install -y ca-certificates curl gnupg ruby wget unzip
+
+# Install AWS CLI
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install
 
 # Install Docker
 install -m 0755 -d /etc/apt/keyrings
