@@ -50,6 +50,7 @@ services:
       - api
     environment:
       DNS_RESOLVER: 127.0.0.11
+      BACKEND_URL: http://api:8080
     ports:
       - "80:3000"
     networks:
