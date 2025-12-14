@@ -18,7 +18,7 @@ echo "Creating .env file..."
 cat <<EOF > .env
 DB_PASSWORD=$DB_PASSWORD
 GEMINI_API_KEY=$GEMINI_API_KEY
-GEMINI_MODEL=gemini-1.5-flash
+GEMINI_MODEL=gemini-2.5-flash
 AWS_REGION=$REGION
 AWS_LOG_GROUP=/app/$ENV_NAME
 EOF

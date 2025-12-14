@@ -31,7 +31,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-tenant}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tenant}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
-      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
     ports:
       - "8080:8080"
     volumes:
