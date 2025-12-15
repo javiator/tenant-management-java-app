@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:21 AS build
+FROM amazoncorretto:21-alpine AS build
 WORKDIR /workspace
 COPY . .
-RUN yum install -y tar gzip
+RUN apk add --no-cache tar gzip
 RUN ./mvnw -q -e -DskipTests package || mvn -q -DskipTests package
 
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:21
+FROM amazoncorretto:21-alpine
 ENV JAVA_OPTS=""
 WORKDIR /app
 COPY --from=build /workspace/target/tenant-management-0.0.1-SNAPSHOT.jar app.jar
