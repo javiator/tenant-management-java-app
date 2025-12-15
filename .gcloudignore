@@ -1,0 +1,14 @@
+.git
+.gitignore
+.dockerignore
+target/
+build/
+node_modules/
+dist/
+.env
+.env.*
+*.tfstate
+*.tfstate.*
+*.tfvars
+.terraform/
+infrastructure/terraform-gcp-cloudrun/.terraform/
