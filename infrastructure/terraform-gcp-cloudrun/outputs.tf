@@ -9,3 +9,8 @@ output "frontend_url" {
 output "db_instance_connection_name" {
   value = google_sql_database_instance.default.connection_name
 }
+
+output "cloudbuild_service_account" {
+  description = "Email of the Cloud Build service account"
+  value       = google_service_account.cloudbuild.email
+}
