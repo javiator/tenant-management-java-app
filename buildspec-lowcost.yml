@@ -32,14 +32,15 @@ phases:
       - |
         sed -e "s|\${BACKEND_IMAGE_URI}|$BACKEND_IMAGE_URI|g" \
             -e "s|\${FRONTEND_IMAGE_URI}|$FRONTEND_IMAGE_URI|g" \
-            docker-compose-lowcost.yml > docker-compose.yml
+            docker-compose-lowcost.yml > docker-compose-lowcost-processed.yml
+      - mv docker-compose-lowcost-processed.yml docker-compose-lowcost.yml
       - echo "Files for artifact:"
-      - cat docker-compose.yml
+      - cat docker-compose-lowcost.yml
       - ls -R scripts/
 
 artifacts:
   files:
-    - docker-compose.yml
+    - docker-compose-lowcost.yml
     - appspec.yml
     - scripts/start_server.sh
   discard-paths: no
