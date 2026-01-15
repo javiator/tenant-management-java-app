@@ -1,18 +1,21 @@
 # AWS Low-Cost Development Environment Guide
 
 ## Overview
-This approach provides a highly cost-effective development environment by consolidating all application components onto a **single EC2 instance**. Instead of paying for managed services like RDS, ALB, or NAT Gateways, we run the database, backend, and frontend as containers Orchestrated by Docker Compose on one `t3.small` server.
+This approach provides a highly cost-effective development environment by consolidating all application components onto a **single EC2 Spot instance with multi-AZ support**. Instead of paying for managed services like RDS, ALB, or NAT Gateways, we run the database, backend, and frontend as containers orchestrated by Docker Compose on one `t3.small` server.
 
 ## Architecture
 
 ![Low-Cost Architecture](generated-diagrams/lowcost_architecture.png)
 
 ### Key Components
-1.  **Single EC2 Instance**: A `t3.small` instance hosts the entire stack.
-    -   Host OS: Amazon Linux 2023
+1.  **EC2 Spot Instance with Auto Scaling**: A `t3.small` (or `t3a.small`/`t2.small`) Spot instance hosts the entire stack.
+    -   **Multi-AZ Deployment**: Spans 3 availability zones (us-east-1a, us-east-1b, us-east-1c) for better Spot availability
+    -   **Auto Scaling Group**: Automatically replaces interrupted instances
+    -   **Instance Diversification**: Can use t3.small, t3a.small, or t2.small for better availability
+    -   Host OS: Ubuntu 24.04 LTS
     -   Runtime: Docker Engine + Docker Compose
 2.  **Containerized Database**: PostgreSQL 16 runs as a Docker container, persisting data to an EBS volume mapping. This eliminates the ~$15/month minimum cost of an RDS instance.
-3.  **Public Subnet Access**: The instance sits in a Public Subnet, accessible via **Instance Connect** or SSH. We rely on Security Groups (firewalls) restricted to our IP (or open ports 80/443 for web access) rather than expensive Load Balancers.
+3.  **Public Subnet Access**: The instance sits in a Public Subnet across multiple AZs, accessible via **Instance Connect** or SSH. We rely on Security Groups (firewalls) restricted to our IP (or open ports 80/443 for web access) rather than expensive Load Balancers.
 4.  **CI/CD**: Full automation via CodePipeline:
     -   **CodeBuild**: Builds Docker images and pushes to ECR.
     -   **CodeDeploy**: Triggers an on-instance script to pull new images and restart `docker-compose`.
@@ -22,15 +25,31 @@ This approach provides a highly cost-effective development environment by consol
 
 | Component | Specification | Approx. Monthly Cost (Region: us-east-1) |
 | :--- | :--- | :--- |
-| **Compute** | EC2 `t3.small` (2 vCPU, 2GB RAM) | ~$15.00 |
-| **Storage** | EBS Volume (gp3, 30GB) | ~$2.40 |
-| **Database** | Self-Hosted in Docker | **$0.00** (Included in Compute) |
+| **Compute** | EC2 `t3.small` Spot (2 vCPU, 2GB RAM) | ~$3.50 - $5.00 (70-80% savings) |
+| **Storage (EFS)** | EFS for PostgreSQL data (~1-2GB) | ~$0.30 - $0.60 |
+| **Storage (EBS)** | Root volume (8GB) | ~$0.64 |
+| **Database** | Self-Hosted in Docker on EFS | **$0.00** (Included in EFS) |
 | **Network** | Public IPv4 Address | ~$3.60 ($0.005/hr) |
+| **Logs** | CloudWatch Logs (5GB/month) | ~$2.50 - $3.00 |
 | **CI/CD** | CodePipeline (1 Active) | ~$1.00 (Often Free Tier eligible) |
 | **Registry** | ECR (Storage + Transfer) | ~$0.50 (Based on usage) |
-| **Total** | | **~$22.50 / Month** |
+| **Total** | | **~$12.00 - $15.00 / Month** |
 
-*Comparison*: A "standard" setup with Managed RDS (`db.t3.micro`), 2 App Runner instances, and NAT Gateway easily exceeds **$100/month**. This approach reduces cost by ~75% for development purposes.
+*Comparison*: 
+- **Standard setup** with Managed RDS, App Runner, and NAT Gateway: **$100+/month**
+- **On-Demand EC2 setup**: **~$22.50/month**
+- **This Spot + EFS setup**: **~$12-15/month** (40% cheaper than On-Demand, 85% cheaper than standard)
+
+**Spot Instance Benefits**:
+- 60-80% cost savings compared to On-Demand
+- Multi-AZ deployment reduces interruption impact
+- Auto Scaling Group automatically replaces interrupted instances
+- `price-capacity-optimized` strategy minimizes interruptions
+
+**Data Persistence**:
+- PostgreSQL data stored on EFS (survives instance replacements)
+- Logs sent to CloudWatch (7-day retention)
+- Application code redeployed automatically via CodeDeploy
 
 ## Deployment Instructions
 
@@ -69,9 +88,18 @@ terraform apply
     ```
 
 ## Trade-offs
--   **Single Point of Failure**: If the EC2 instance dies, the app and DB are down.
--   **Data Durability**: Data is persisted to EBS. Snapshots should be automated for backups.
--   **Scaling**: Manual vertical scaling (resize instance) only. No auto-scaling.
+-   **Spot Interruptions**: Spot instances can be interrupted when AWS needs capacity back. However:
+    -   Multi-AZ deployment across 3 zones significantly reduces interruption frequency
+    -   Auto Scaling Group automatically launches replacement instances
+    -   Instance diversification (t3.small, t3a.small, t2.small) improves availability
+    -   Typical interruption rate: 5-10% (varies by region/AZ)
+-   **Data Durability**: Data is persisted to EBS. **Important**: Set up automated EBS snapshots for backups, as instance replacements will lose local data.
+-   **Scaling**: Manual vertical scaling (resize instance type in ASG) only. No horizontal auto-scaling.
 -   **Maintenance**: OS updates and Docker management are user responsibilities.
+-   **Brief Downtime**: When Spot instance is interrupted, there will be 2-5 minutes of downtime while ASG launches replacement.
 
-This environment is **ideal for development, testing, and demos**, but **not recommended for production** without redundancy and backups.
+This environment is **ideal for development, testing, and demos**, but **not recommended for production** without:
+- Automated EBS snapshots
+- Database backup strategy
+- Monitoring and alerting for interruptions
+- Consider Reserved Instances or Savings Plans for production workloads

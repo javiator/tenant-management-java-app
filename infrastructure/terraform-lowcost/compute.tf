@@ -76,20 +76,12 @@ resource "aws_launch_template" "app_server" {
   network_interfaces {
     associate_public_ip_address = true
     security_groups             = [aws_security_group.instance_sg.id]
-    subnet_id                   = aws_subnet.public.id
   }
 
-  user_data = base64encode(file("user_data.sh"))
-
-  # Spot instance configuration
-  instance_market_options {
-    market_type = "spot"
-    spot_options {
-      max_price                      = "" # Use on-demand price as max
-      spot_instance_type             = "persistent"
-      instance_interruption_behavior = "stop" # Stop instead of terminate
-    }
-  }
+  user_data = base64encode(templatefile("user_data.sh", {
+    environment = var.environment
+    region      = var.aws_region
+  }))
 
   tag_specifications {
     resource_type = "instance"
@@ -113,18 +105,75 @@ resource "aws_launch_template" "app_server" {
   }
 }
 
-resource "aws_instance" "app_server" {
-  launch_template {
-    id      = aws_launch_template.app_server.id
-    version = "$Latest"
+# Auto Scaling Group with multi-AZ Spot instances
+resource "aws_autoscaling_group" "app_server" {
+  name                = "${var.environment}-app-asg"
+  min_size            = 1
+  max_size            = 1
+  desired_capacity    = 1
+  vpc_zone_identifier = aws_subnet.public[*].id
+  health_check_type   = "EC2"
+  health_check_grace_period = 300
+
+  mixed_instances_policy {
+    instances_distribution {
+      on_demand_base_capacity                  = 0
+      on_demand_percentage_above_base_capacity = 0
+      spot_allocation_strategy                 = "price-capacity-optimized"
+    }
+
+    launch_template {
+      launch_template_specification {
+        launch_template_id = aws_launch_template.app_server.id
+        version            = "$Latest"
+      }
+
+      # Diversify instance types for better availability
+      override {
+        instance_type = "t3.small"
+      }
+      override {
+        instance_type = "t3a.small"
+      }
+      override {
+        instance_type = "t2.small"
+      }
+    }
   }
 
-  tags = {
-    Name            = "${var.environment}-app-server"
-    CodeDeployGroup = "${var.environment}-deployment-group"
-    Environment     = var.environment
-    ManagedBy       = "Terraform"
-    Project         = "tenant-management"
-    InstanceType    = "spot"
+  tag {
+    key                 = "Name"
+    value               = "${var.environment}-app-server"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "CodeDeployGroup"
+    value               = "${var.environment}-deployment-group"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Environment"
+    value               = var.environment
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "ManagedBy"
+    value               = "Terraform"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Project"
+    value               = "tenant-management"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "InstanceType"
+    value               = "spot"
+    propagate_at_launch = true
   }
 }

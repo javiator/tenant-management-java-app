@@ -1,7 +1,7 @@
 version: 0.0
 os: linux
 files:
-  - source: docker-compose.yml
+  - source: docker-compose-lowcost.yml
     destination: /home/ubuntu/app
   - source: scripts/start_server.sh
     destination: /home/ubuntu/app/scripts

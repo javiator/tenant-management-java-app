@@ -4,6 +4,7 @@ set -e
 REGION="us-east-1"
 ENV_NAME="lowcost-env"
 
+# Deploy to EFS location (symlinked to /home/ubuntu/app)
 cd /home/ubuntu/app
 
 echo "Fetching parameters from SSM..."
@@ -14,7 +15,6 @@ echo "Changing ownership of app directory..."
 chown -R ubuntu:ubuntu /home/ubuntu/app
 
 echo "Creating .env file..."
-# We write to a temporary file then move it to avoid permission issues if run as root but consumed by user
 cat <<EOF > .env
 DB_PASSWORD=$DB_PASSWORD
 GEMINI_API_KEY=$GEMINI_API_KEY
@@ -23,20 +23,13 @@ AWS_REGION=$REGION
 AWS_LOG_GROUP=/app/$ENV_NAME
 EOF
 
-echo "Checking for Docker Compose..."
-if ! command -v docker-compose &> /dev/null; then
-    echo "Docker Compose not found. Installing..."
-    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
-fi
-
 echo "Logging into ECR..."
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
 echo "Starting Application..."
-/usr/local/bin/docker-compose -f docker-compose.yml pull
-/usr/local/bin/docker-compose -f docker-compose.yml up -d --remove-orphans
+docker compose -f docker-compose-lowcost.yml pull
+docker compose -f docker-compose-lowcost.yml up -d --remove-orphans
 
 echo "Pruning old images..."
 docker image prune -a -f --filter "until=24h"
