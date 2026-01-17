@@ -14,7 +14,7 @@ This approach provides a highly cost-effective development environment by consol
     -   **Instance Diversification**: Can use t3.small, t3a.small, or t2.small for better availability
     -   Host OS: Ubuntu 24.04 LTS
     -   Runtime: Docker Engine + Docker Compose
-2.  **Containerized Database**: PostgreSQL 16 runs as a Docker container, persisting data to an EBS volume mapping. This eliminates the ~$15/month minimum cost of an RDS instance.
+2.  **Containerized Database**: PostgreSQL 16 runs as a Docker container, persisting data to a **shared EFS volume** mapping. This ensures data is available across all zones and eliminates the ~$15/month minimum cost of an RDS instance.
 3.  **Public Subnet Access**: The instance sits in a Public Subnet across multiple AZs, accessible via **Instance Connect** or SSH. We rely on Security Groups (firewalls) restricted to our IP (or open ports 80/443 for web access) rather than expensive Load Balancers.
 4.  **CI/CD**: Full automation via CodePipeline:
     -   **CodeBuild**: Builds Docker images and pushes to ECR.
@@ -47,7 +47,7 @@ This approach provides a highly cost-effective development environment by consol
 - `price-capacity-optimized` strategy minimizes interruptions
 
 **Data Persistence**:
-- PostgreSQL data stored on EFS (survives instance replacements)
+- PostgreSQL data stored on a **Regional EFS** (survives instance replacements and AZ swaps)
 - Logs sent to CloudWatch (7-day retention)
 - Application code redeployed automatically via CodeDeploy
 
@@ -93,7 +93,7 @@ terraform apply
     -   Auto Scaling Group automatically launches replacement instances
     -   Instance diversification (t3.small, t3a.small, t2.small) improves availability
     -   Typical interruption rate: 5-10% (varies by region/AZ)
--   **Data Durability**: Data is persisted to EBS. **Important**: Set up automated EBS snapshots for backups, as instance replacements will lose local data.
+-   **Data Durability**: Data is persisted to **EFS**, which is a regional service. Data survives instance replacements and availability zone changes. **Recommendation**: While EFS is highly durable, you should still consider periodic backups of critical database state.
 -   **Scaling**: Manual vertical scaling (resize instance type in ASG) only. No horizontal auto-scaling.
 -   **Maintenance**: OS updates and Docker management are user responsibilities.
 -   **Brief Downtime**: When Spot instance is interrupted, there will be 2-5 minutes of downtime while ASG launches replacement.

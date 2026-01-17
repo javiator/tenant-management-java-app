@@ -25,8 +25,26 @@ usermod -aG docker ubuntu
 
 # Mount EFS
 mkdir -p /mnt/efs
-EFS_ID=$(aws efs describe-file-systems --query "FileSystems[?Tags[?Key=='Environment' && Value=='${environment}']].FileSystemId" --output text --region ${region})
-mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport $EFS_ID.efs.${region}.amazonaws.com:/ /mnt/efs
+EFS_ID="${efs_id}"
+
+echo "Attempting to mount EFS: $EFS_ID"
+MAX_RETRIES=5
+COUNT=0
+MOUNTED=false
+
+while [ $COUNT -lt $MAX_RETRIES ]; do
+  mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport $EFS_ID.efs.${region}.amazonaws.com:/ /mnt/efs && MOUNTED=true && break
+  echo "Mount failed, retrying in 5 seconds... ($((COUNT+1))/$MAX_RETRIES)"
+  sleep 5
+  ((COUNT++))
+done
+
+if [ "$MOUNTED" = false ]; then
+  echo "CRITICAL: Failed to mount EFS after $MAX_RETRIES attempts. Exiting to avoid data corruption on local disk."
+  exit 1
+fi
+
+echo "EFS mounted successfully"
 
 # Create directories on EFS
 mkdir -p /mnt/efs/postgres

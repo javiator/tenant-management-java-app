@@ -81,6 +81,7 @@ resource "aws_launch_template" "app_server" {
   user_data = base64encode(templatefile("user_data.sh", {
     environment = var.environment
     region      = var.aws_region
+    efs_id      = aws_efs_file_system.db_data.id
   }))
 
   tag_specifications {

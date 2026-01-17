@@ -61,7 +61,8 @@ terraform apply
 - Terminate your current instance
 - Create new Auto Scaling Group
 - Launch new instance in one of the 3 AZs
-- **Data on current instance will be lost** - backup if needed!
+- **Database data is safe on EFS** - it will be automatically remounted on the new instance.
+- **Local data (not on /mnt/efs) will be lost** - backup any custom local files if needed!
 
 ### 4. Verify Deployment
 ```bash
@@ -93,8 +94,6 @@ terraform apply
    - Auto Scaling Group health
    - Instance state changes
 
-2. Enable EBS snapshots:
-   - Automated daily snapshots
-   - Retention: 7 days minimum
-
-3. Consider AWS Backup for automated backup management
+2. Enable Backups:
+   - **EFS Backup**: Use AWS Backup for automated EFS recovery points.
+   - **EBS Snapshots**: Automated daily snapshots for the root volume (optional but recommended).
